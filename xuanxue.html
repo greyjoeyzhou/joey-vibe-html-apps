@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>八字紫薇星盘排盘</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1008; --paper: #f5ede0; --gold: #c9942a;
+    --red: #8b1a1a; --blue: #1a3a5c; --fade: #8b7355; --border: #d4b896;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'Noto Serif SC', serif; min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(201,148,42,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(192,57,43,0.06) 0%, transparent 60%);
+  }
+  .page { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  header { text-align: center; padding: 32px 0 24px; }
+  header::after { content:'';display:block;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto 0; }
+  .title-main { font-family:'Ma Shan Zheng',serif;font-size:clamp(2rem,6vw,3.5rem);color:var(--ink);letter-spacing:0.2em;text-shadow:1px 1px 0 rgba(201,148,42,0.3); }
+  .title-sub { font-size:0.85rem;color:var(--fade);letter-spacing:0.3em;margin-top:6px; }
+
+  .form-card { background:rgba(255,255,255,0.6);border:1px solid var(--border);border-radius:4px;padding:24px;margin-bottom:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+  .form-row { display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:center; }
+  .form-notice { margin-top:12px;font-size:0.76rem;color:var(--fade);line-height:1.75;text-align:center; }
+  .form-notice.error { color:var(--red); }
+  .inline-check { display:flex;align-items:center;gap:6px;height:37px;padding:0 8px;border:1px solid var(--border);border-radius:3px;background:rgba(255,255,255,0.9); }
+  .inline-check input { width:auto; }
+  .form-divider { width:1px;height:40px;background:var(--border);align-self:flex-end;margin:0 4px; }
+  .field { display:flex;flex-direction:column;gap:6px; }
+  .field label { font-size:0.72rem;color:var(--fade);letter-spacing:0.08em; }
+  .field input,.field select { padding:8px 10px;border:1px solid var(--border);border-radius:3px;background:rgba(255,255,255,0.9);font-family:'Noto Serif SC',serif;font-size:0.9rem;color:var(--ink);outline:none;transition:border-color 0.2s;width:82px; }
+  .field input:focus,.field select:focus { border-color:var(--gold); }
+  .field.wide input,.field.wide select { width:106px; }
+  .btn { padding:10px 28px;background:var(--ink);color:var(--paper);border:none;border-radius:3px;font-family:'Noto Serif SC',serif;font-size:0.9rem;letter-spacing:0.15em;cursor:pointer;transition:background 0.2s,transform 0.1s;align-self:flex-end; }
+  .btn:hover { background:#3a2810; } .btn:active { transform:scale(0.98); }
+  .form-actions { display:flex;gap:8px;align-self:flex-end;flex-wrap:wrap;justify-content:flex-end; }
+  .form-actions .btn-lite { padding:9px 12px;font-size:0.74rem; }
+  .btn:focus-visible,.btn-lite:focus-visible,.tab:focus-visible,.field input:focus-visible,.field select:focus-visible { outline:2px solid rgba(201,148,42,0.75); outline-offset:2px; }
+
+  .tabs-row { display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:18px; }
+  .tabs { display:flex;flex:1 1 520px;min-width:0;margin-bottom:0;border-bottom:2px solid var(--border); }
+  .tab { padding:10px 20px;cursor:pointer;font-size:0.88rem;letter-spacing:0.1em;color:var(--fade);border-bottom:2px solid transparent;margin-bottom:-2px;transition:color 0.2s,border-color 0.2s; }
+  .tab.active { color:var(--ink);border-bottom-color:var(--gold);font-weight:600; }
+  .action-row { display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap;margin:0 0 2px auto; }
+  .btn-lite { padding:7px 14px;border:1px solid var(--border);background:rgba(255,255,255,0.78);color:var(--ink);font-family:'Noto Serif SC',serif;font-size:0.78rem;letter-spacing:0.08em;cursor:pointer;border-radius:3px; }
+  .btn-lite:hover { border-color:var(--gold); }
+  .result { display:none; } .result.active { display:block; }
+  .h-scroll { overflow-x:auto;padding-bottom:4px; }
+
+  .summary-card { border:1px solid var(--border);background:rgba(255,255,255,0.68);border-radius:4px;padding:12px 14px;margin-bottom:14px; }
+  .summary-title { font-size:0.76rem;color:var(--fade);letter-spacing:0.11em;margin-bottom:8px; }
+  .summary-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px; }
+  .summary-item { font-size:0.78rem;color:var(--ink);line-height:1.6; }
+  .fold { border:1px solid var(--border);background:rgba(255,255,255,0.55);border-radius:4px;margin-bottom:14px;overflow:hidden; }
+  .fold > summary { list-style:none;cursor:pointer;padding:11px 12px;font-size:0.8rem;letter-spacing:0.1em;color:var(--ink);background:rgba(255,255,255,0.75);border-bottom:1px solid rgba(212,184,150,0.5); }
+  .fold > summary::-webkit-details-marker { display:none; }
+  .fold > summary::after { content:'展开';float:right;color:var(--fade);font-size:0.7rem; }
+  .fold[open] > summary::after { content:'收起'; }
+  .fold-body { padding:12px; }
+  .ai-note { font-size:0.73rem;color:var(--fade);line-height:1.8;margin-bottom:8px; }
+  .ai-actions { display:flex;gap:8px;flex-wrap:wrap;margin:8px 0; }
+  .ai-prompt { width:100%;min-height:148px;border:1px solid var(--border);border-radius:3px;padding:10px 11px;background:rgba(255,255,255,0.88);font-family:'Noto Serif SC',serif;font-size:0.78rem;line-height:1.7;color:var(--ink);resize:vertical; }
+  .ai-prompt:focus-visible { outline:2px solid rgba(201,148,42,0.75);outline-offset:2px; }
+  .calc-meta { border:1px dashed rgba(139,115,85,0.45);background:rgba(255,255,255,0.45);border-radius:4px;padding:10px 12px;margin-bottom:12px; }
+  .calc-meta-title { font-size:0.7rem;color:var(--fade);letter-spacing:0.12em;margin-bottom:6px; }
+  .calc-meta-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px 12px; }
+  .calc-meta-item { font-size:0.73rem;color:var(--ink);line-height:1.6; }
+
+  .section-heading { font-family:'Ma Shan Zheng',serif;font-size:1.3rem;color:var(--ink);letter-spacing:0.2em;border-left:3px solid var(--gold);padding-left:12px;margin-bottom:16px; }
+
+  /* BaZi */
+  .pillars { display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:28px; }
+  .pillar { display:flex;flex-direction:column;align-items:center;width:80px; }
+  .pillar-label { font-size:0.7rem;color:var(--fade);letter-spacing:0.1em;margin-bottom:6px; }
+  .pillar-stem,.pillar-branch { width:72px;height:72px;display:flex;align-items:center;justify-content:center;font-family:'Ma Shan Zheng',serif;font-size:2rem;border:1px solid var(--border);border-radius:3px; }
+  .pillar-stem { background:rgba(255,255,255,0.8);margin-bottom:4px; }
+  .pillar-branch { background:rgba(255,248,235,0.9); }
+  .pillar-stem.yang,.pillar-branch.yang { color:var(--blue); }
+  .pillar-stem.yin,.pillar-branch.yin { color:var(--red); }
+  .pillar-elem { font-size:0.65rem;color:var(--fade);margin-top:4px;letter-spacing:0.1em; }
+
+  .info-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:28px; }
+  .info-card { background:rgba(255,255,255,0.5);border:1px solid var(--border);border-radius:3px;padding:14px 16px; }
+  .info-card h4 { font-size:0.72rem;color:var(--fade);letter-spacing:0.12em;margin-bottom:8px; }
+  .info-card .val { font-size:1rem;color:var(--ink);font-weight:600; }
+  .info-card .sub { font-size:0.78rem;color:var(--fade);margin-top:4px; }
+
+  .five-elems { margin-bottom:28px; }
+  .five-elems h3 { font-size:0.8rem;color:var(--fade);letter-spacing:0.15em;margin-bottom:16px; }
+  .elem-bars { display:flex;gap:8px;align-items:flex-end;height:118px; }
+  .elem-bar-wrap { flex:1;display:flex;flex-direction:column;align-items:center;gap:4px; }
+  .elem-bar { width:100%;border-radius:2px 2px 0 0;min-height:6px; }
+  .elem-bar-label { font-size:0.75rem;font-weight:600; }
+  .elem-bar-count { font-size:0.7rem;color:var(--fade); }
+
+  .luck-pillars { margin-bottom:28px;overflow-x:auto; }
+  .luck-pillars h3 { font-size:0.8rem;color:var(--fade);letter-spacing:0.15em;margin-bottom:12px; }
+  .luck-row { display:flex;gap:8px; }
+  .luck-pill { min-width:58px;text-align:center;border:1px solid var(--border);border-radius:3px;padding:8px 6px;background:rgba(255,255,255,0.5); }
+  .luck-age { font-size:0.62rem;color:var(--fade);margin-bottom:4px; }
+
+  /* Ziwei */
+  .ziwei-grid { display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(110px,auto));gap:3px;background:var(--border);border:2px solid var(--ink);margin-bottom:28px; }
+  .palace { background:#fdf6ec;padding:7px;min-height:110px;overflow:hidden; }
+  .palace.highlight { background:rgba(201,148,42,0.14); }
+  .palace-header { font-size:0.68rem;color:var(--fade);letter-spacing:0.08em;border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center; }
+  .palace-branch-lbl { font-weight:700;color:var(--ink);font-size:0.75rem; }
+  .palace-self-tag { font-size:0.6rem;color:var(--gold);display:block;margin-bottom:2px; }
+  .palace-stars { display:flex;flex-wrap:wrap;gap:2px;margin-top:3px; }
+  .star { font-size:0.65rem;padding:1px 3px;border-radius:2px;line-height:1.4; }
+  .star.major { background:rgba(139,26,26,0.13);color:var(--red);font-weight:700; }
+  .star.minor { background:rgba(26,58,92,0.1);color:var(--blue); }
+  .star.aux   { background:rgba(139,115,85,0.1);color:var(--fade); }
+  .ziwei-center { grid-column:2/4;grid-row:2/4;background:rgba(255,250,240,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;text-align:center; }
+  .ziwei-center-title { font-family:'Ma Shan Zheng',serif;font-size:1.5rem;color:var(--ink);letter-spacing:0.25em; }
+  .ziwei-center-info { font-size:0.78rem;color:var(--fade);line-height:2.1; }
+
+  /* Natal chart */
+  .natal-wrap { display:flex;flex-direction:column;align-items:center;gap:20px; }
+  .natal-svg-box { width:100%;max-width:520px; }
+  .planet-table { width:100%;overflow-x:auto; }
+  .planet-table table { width:100%;border-collapse:collapse;font-size:0.82rem; }
+  .planet-table th { font-size:0.7rem;color:var(--fade);font-weight:400;padding:5px 8px;border-bottom:2px solid var(--border);text-align:center;letter-spacing:0.08em; }
+  .planet-table td { padding:6px 8px;border-bottom:1px solid var(--border);text-align:center; }
+  .planet-table tr:hover td { background:rgba(201,148,42,0.05); }
+  .aspect-legend { display:flex;gap:16px;flex-wrap:wrap;font-size:0.75rem;color:var(--fade);margin-top:8px; }
+  .asp-item { display:flex;align-items:center;gap:5px; }
+  .asp-line { width:18px;height:2px;border-radius:1px; }
+
+  .empty-state { text-align:center;padding:60px 20px;color:var(--fade);font-size:0.9rem;letter-spacing:0.1em; }
+  .empty-state .big { font-family:'Ma Shan Zheng',serif;font-size:3rem;display:block;margin-bottom:12px;opacity:0.3; }
+
+  /* ===== VEDIC / JYOTISH ===== */
+  .vedic-wrap { display:flex;flex-direction:column;gap:24px; }
+  .vedic-top  { display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start; }
+  .vedic-chart-box { flex:0 0 auto;width:100%;max-width:420px; }
+  .vedic-sidebar { flex:1;min-width:220px; }
+
+  /* South Indian Chart Grid */
+  .si-grid {
+    display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(90px,auto));
+    gap:2px;background:#5a2800;border:2px solid #8b4400;width:100%;
+  }
+  .rashi-cell {
+    background:#1a0800;padding:6px;min-height:90px;position:relative;overflow:hidden;
+    border:1px solid #3a1800;
+  }
+  .rashi-cell.lagna { background:#221000;border:1px solid #c9942a;box-shadow:inset 0 0 8px rgba(201,148,42,0.15); }
+  .si-center {
+    grid-column:2/4;grid-row:2/4;background:#130700;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:8px;padding:12px;text-align:center;border:1px solid #3a1800;
+  }
+  .si-center-title { font-family:'Ma Shan Zheng',serif;font-size:1.2rem;color:#c9942a;letter-spacing:0.2em; }
+  .si-center-info  { font-size:0.72rem;color:#8b6040;line-height:1.9; }
+  .rashi-hdr { display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3a1800;padding-bottom:3px;margin-bottom:3px; }
+  .rashi-name-lbl { font-size:0.6rem;color:#7a4820;letter-spacing:0.04em; }
+  .rashi-num-lbl  { font-size:0.65rem;color:#5a3010;font-weight:700; }
+  .lagna-mark { font-size:0.62rem;color:#c9942a;font-weight:700;letter-spacing:0.05em;margin-bottom:2px; }
+  .graha-tags { display:flex;flex-wrap:wrap;gap:2px;margin-top:2px; }
+  .graha-tag {
+    font-family:serif;font-size:0.68rem;padding:1px 4px;border-radius:2px;
+    line-height:1.35;cursor:default;
+  }
+  .graha-tag.exalted     { background:rgba(201,148,42,0.18);color:#d4a020;font-weight:700; }
+  .graha-tag.debilitated { background:rgba(200,40,40,0.15); color:#dd5555;font-weight:700; }
+  .graha-tag.own         { background:rgba(60,120,220,0.14);color:#5599ee;font-weight:700; }
+  .graha-tag.neutral     { color:#7a6040; }
+  .graha-tag.moolatrikona{ background:rgba(40,160,80,0.14); color:#44bb66;font-weight:700; }
+
+  /* Nakshatra + dasha tables */
+  .vedic-table { width:100%;border-collapse:collapse;font-size:0.78rem; }
+  .vedic-table th { font-size:0.68rem;color:#8b7355;font-weight:400;padding:5px 8px;border-bottom:2px solid var(--border);text-align:left;letter-spacing:0.07em; }
+  .vedic-table td { padding:5px 8px;border-bottom:1px solid rgba(212,184,150,0.25);vertical-align:middle; }
+  .vedic-table tr:hover td { background:rgba(139,68,0,0.04); }
+  .dasha-row-active td { background:rgba(201,148,42,0.09)!important;font-weight:600; }
+  .dasha-bar-bg { background:rgba(201,148,42,0.12);border-radius:3px;height:5px;width:100%;min-width:50px; }
+  .dasha-bar-fg { background:#c9942a;height:5px;border-radius:3px; }
+  .dignity-dot { display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle; }
+  .vedic-sub-h { font-size:0.72rem;color:var(--fade);letter-spacing:0.15em;margin:14px 0 8px; }
+  .vedic-sub-h:first-child { margin-top:0; }
+  .ayan-note { font-size:0.7rem;color:var(--fade);margin-bottom:12px;letter-spacing:0.04em; }
+
+  @media(max-width:900px) {
+    .tabs-row { margin-bottom:14px; }
+    .tabs { overflow-x:auto;white-space:nowrap; }
+    .tab { flex:0 0 auto;padding:10px 14px;font-size:0.8rem; }
+    .action-row { margin-left:0; }
+    .ziwei-grid { min-width:640px; }
+    .si-grid { min-width:560px; }
+  }
+  @media(max-width:600px) {
+    .form-card { padding:16px 12px; }
+    .field input,.field select { width:76px;font-size:0.82rem; }
+    .field.wide input,.field.wide select { width:96px; }
+    .five-elems h3 { margin-bottom:12px; }
+    .elem-bars { height:98px; }
+    .palace { min-height:78px;padding:4px; } .star { font-size:0.58rem; }
+    .ziwei-grid { grid-template-rows:repeat(4,minmax(78px,auto)); }
+    .pillar { width:66px; } .pillar-stem,.pillar-branch { width:60px;height:60px;font-size:1.6rem; }
+    .planet-table th,.planet-table td,.vedic-table th,.vedic-table td { font-size:0.7rem;padding:4px 5px; }
+    .summary-item { font-size:0.72rem; }
+  }
+
+  @media print {
+    body { background:#fff; }
+    .form-card, .tabs, .action-row, header { display:none !important; }
+    .result { display:none !important; }
+    .result.active { display:block !important; }
+    .summary-card { break-inside:avoid; border:1px solid #999; }
+    details.fold > summary { display:none !important; }
+    details.fold:not([open]) > *:not(summary) { display:block !important; }
+    .page { max-width:none;padding:0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="title-main">命理排盘</div>
+    <div class="title-sub">八字 · 紫薇斗数 · 西洋星盘 · 吠陀占星</div>
+  </header>
+
+  <div class="form-card">
+    <div class="form-row">
+      <div class="field wide"><label>出生年份</label><input type="number" id="year" aria-label="出生年份" min="1900" max="2100" value="1990"></div>
+      <div class="field"><label>月</label><input type="number" id="month" aria-label="出生月份" min="1" max="12" value="5"></div>
+      <div class="field"><label>日</label><input type="number" id="day" aria-label="出生日期" min="1" max="31" value="15"></div>
+      <div class="field wide"><label>时辰（八字用）</label>
+        <select id="hour" aria-label="八字时辰">
+          <option value="0">子 23-1点</option><option value="1">丑 1-3点</option>
+          <option value="2">寅 3-5点</option><option value="3">卯 5-7点</option>
+          <option value="4">辰 7-9点</option><option value="5">巳 9-11点</option>
+          <option value="6">午 11-13点</option><option value="7">未 13-15点</option>
+          <option value="8">申 15-17点</option><option value="9">酉 17-19点</option>
+          <option value="10">戌 19-21点</option><option value="11">亥 21-23点</option>
+        </select>
+      </div>
+      <div class="field"><label>性别</label>
+        <select id="gender" aria-label="性别"><option value="m">男</option><option value="f">女</option></select>
+      </div>
+      <div class="form-divider"></div>
+      <div class="field"><label>出生时刻(星盘)</label><input type="number" id="localHour" aria-label="星盘出生时刻" min="0" max="23" step="0.5" value="12.0" placeholder="如12.5"></div>
+      <div class="field"><label>UTC偏移</label><input type="number" id="utcOffset" aria-label="UTC偏移" min="-12" max="14" step="0.5" value="8" placeholder="如8或-5"></div>
+      <div class="field"><label>夏令时</label><label class="inline-check"><input type="checkbox" id="dst" aria-label="夏令时"> +1h</label></div>
+      <div class="field"><label>纬度</label><input type="number" id="lat" aria-label="纬度" step="0.1" value="39.9"></div>
+      <div class="field"><label>经度</label><input type="number" id="lon" aria-label="经度" step="0.1" value="116.4"></div>
+      <div class="form-actions">
+        <button id="langToggleBtn" class="btn-lite" type="button" onclick="toggleLanguage()">中文 / EN</button>
+        <button id="resetStateBtn" class="btn-lite" type="button" onclick="resetSavedState()">重置已保存状态</button>
+        <button id="calcBtn" class="btn" type="button" onclick="calculate()">排　盘</button>
+      </div>
+    </div>
+    <div id="formNotice" class="form-notice">提示：星盘/吠陀计算使用输入时区与夏令时，不再使用经度近似换算UTC。部分天文算法为简化模型，仅供学习参考。</div>
+  </div>
+
+  <div id="output">
+    <div class="empty-state"><span class="big">命</span>请输入出生信息以排盘</div>
+  </div>
+</div>
+
+<script>
+// ===== Shared helpers =====
+const TG = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const DZ = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const WX_S = ['木','木','火','火','土','土','金','金','水','水'];
+const WX_B = ['水','土','木','木','土','火','火','土','金','金','土','水'];
+const YY_S = ['阳','阴','阳','阴','阳','阴','阳','阴','阳','阴'];
+const YY_B = ['阳','阴','阳','阴','阳','阴','阳','阴','阳','阴','阳','阴'];
+const SX   = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+const EC   = {'木':'#2e7d32','火':'#c62828','土':'#b8860b','金':'#6d6d6d','水':'#1565c0'};
+const NAYIN= ['海中金','炉中火','大林木','路旁土','剑锋金','山头火','涧下水','城头土',
+               '白蜡金','杨柳木','泉中水','屋上土','霹雳火','松柏木','长流水','沙中金',
+               '山下火','平地木','壁上土','金箔金','覆灯火','天河水','大驿土','钗钏金',
+               '桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
+const PNAMES= ['命宫','兄弟','夫妻','子女','财帛','疾厄','迁移','交友','官禄','田宅','福德','父母'];
+
+function jiaziIdx(s,b){ const diff=((b-s)%12+12)%12; return s+10*((5*((diff>>1)%6))%6); }
+function nayin(s,b){ return NAYIN[Math.floor(jiaziIdx(s,b)/2)]; }
+function jd(y,m,d){ const a=Math.floor((14-m)/12),yr=y+4800-a,mn=m+12*a-3; return d+Math.floor((153*mn+2)/5)+365*yr+Math.floor(yr/4)-Math.floor(yr/100)+Math.floor(yr/400)-32045; }
+function approxLunarDay(y,m,d){ const jdn=jd(y,m,d),n=Math.round((jdn-2451550.1)/29.530588),nm=Math.round(2451550.1+n*29.530588); return Math.max(1,Math.min(30,jdn-nm+1)); }
+function setNotice(msg,isError){ const n=document.getElementById('formNotice'); if(!n)return; n.textContent=msg; n.classList.toggle('error',!!isError); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function normalizeUtcDate(y,m,d,utHour){
+  const baseMs=Date.UTC(y,m-1,d,0,0,0,0);
+  const ms=baseMs+Math.round(utHour*3600000);
+  const dt=new Date(ms);
+  const h=dt.getUTCHours()+dt.getUTCMinutes()/60+dt.getUTCSeconds()/3600;
+  return { year:dt.getUTCFullYear(), month:dt.getUTCMonth()+1, day:dt.getUTCDate(), utHour:h };
+}
+function utcLabel(norm){
+  const hh=Math.floor(norm.utHour),mm=Math.round((norm.utHour-hh)*60);
+  return `${norm.year}-${pad2(norm.month)}-${pad2(norm.day)} ${pad2(hh)}:${pad2(mm)} UTC`;
+}
+function buildCalcMeta(meta){
+  return `<div class="calc-meta"><div class="calc-meta-title">计算元数据</div><div class="calc-meta-grid"><div class="calc-meta-item"><strong>输入时间：</strong>${meta.inputDate} ${meta.localHour.toFixed(2)}h</div><div class="calc-meta-item"><strong>时区设定：</strong>UTC${meta.utcOffset>=0?'+':''}${meta.utcOffset}${meta.dstOn?' + DST 1h':''}</div><div class="calc-meta-item"><strong>天文UTC：</strong>${meta.utcText}</div><div class="calc-meta-item"><strong>定位：</strong>${meta.lat.toFixed(4)}°, ${meta.lon.toFixed(4)}°</div><div class="calc-meta-item"><strong>近似说明：</strong>紫薇农历日为估算；西洋/吠陀采用简化天体模型</div><div class="calc-meta-item"><strong>分宫说明：</strong>西洋与吠陀为整宫制</div></div></div>`;
+}
+function buildCollapsible(title, bodyHTML, open){
+  return `<details class="fold"${open?' open':''}><summary>${title}</summary><div class="fold-body">${bodyHTML}</div></details>`;
+}
+function buildSummaryCard(title,items){
+  const rows=items.map(i=>`<div class="summary-item"><strong>${i.k}</strong> ${i.v}</div>`).join('');
+  return `<div class="summary-card"><div class="summary-title">${title}</div><div class="summary-grid">${rows}</div></div>`;
+}
+let uiLang='zh';
+const TAB_KEYS=['bazi','ziwei','western','vedic','synthesis'];
+const I18N={
+  zh:{
+    subtitle:'八字 · 紫薇斗数 · 西洋星盘 · 吠陀占星',
+    birthYear:'出生年份',month:'月',day:'日',hour:'时辰（八字用）',gender:'性别',
+    localHour:'出生时刻(星盘)',utcOffset:'UTC偏移',dst:'夏令时',lat:'纬度',lon:'经度',
+    male:'男',female:'女',calc:'排　盘',resetState:'重置已保存状态',langToggle:'中文 / EN',
+    printTab:'打印当前页',aiTitle:'AI解盘（使用你的 ChatGPT 订阅）',aiNote:'说明：本页不会读取你的 ChatGPT 登录信息。点击按钮会打开 ChatGPT 网页，你可用自己的订阅账号完成 AI 解盘。',
+    aiRefresh:'刷新提示词',aiCopy:'复制提示词',aiOpen:'在 ChatGPT 打开',
+    aiPresetTitle:'AI提问模板',aiPresetCareer:'事业导向',aiPresetRelationship:'关系导向',aiPresetHealth:'健康作息导向',aiPresetReset:'恢复基础模板',
+    tabBazi:'八字命盘',tabZiwei:'紫薇斗数',tabWestern:'西洋星盘',tabVedic:'吠陀星盘',tabSynthesis:'综合解盘',
+    foldDetail:'具体排盘',foldBasic:'基本解盘信息',
+    noticeCopied:'AI解盘提示词已复制，可直接粘贴到 ChatGPT。',
+    noticeOpen:'已打开 ChatGPT，请使用你的订阅账号继续解盘。',
+    noticeNoPrompt:'暂无可用提示词，请先排盘。',
+    noticeStateReset:'已重置本地保存状态。',noticePresetApplied:'已应用AI提问模板。'
+  },
+  en:{
+    subtitle:'BaZi · ZiWei · Western Natal · Vedic Astrology',
+    birthYear:'Birth Year',month:'Month',day:'Day',hour:'Hour Pillar',gender:'Gender',
+    localHour:'Birth Time (Charts)',utcOffset:'UTC Offset',dst:'Daylight Saving',lat:'Latitude',lon:'Longitude',
+    male:'Male',female:'Female',calc:'Calculate',resetState:'Reset Saved State',langToggle:'EN / 中文',
+    printTab:'Print Active Tab',aiTitle:'AI Reading (Use Your ChatGPT Subscription)',aiNote:'This page does not access your ChatGPT login. The button opens ChatGPT so you can continue with your own subscription.',
+    aiRefresh:'Refresh Prompt',aiCopy:'Copy Prompt',aiOpen:'Open in ChatGPT',
+    aiPresetTitle:'Prompt Presets',aiPresetCareer:'Career Focus',aiPresetRelationship:'Relationship Focus',aiPresetHealth:'Health Routine Focus',aiPresetReset:'Reset Base Prompt',
+    tabBazi:'BaZi Chart',tabZiwei:'ZiWei Chart',tabWestern:'Western Chart',tabVedic:'Vedic Chart',tabSynthesis:'Integrated Reading',
+    foldDetail:'Detailed Chart',foldBasic:'Basic Interpretation',
+    noticeCopied:'AI prompt copied. Paste it into ChatGPT.',
+    noticeOpen:'ChatGPT opened. Continue with your subscription account.',
+    noticeNoPrompt:'No prompt yet. Please calculate first.',
+    noticeStateReset:'Saved local state reset.',noticePresetApplied:'Prompt preset applied.'
+  }
+};
+function L(key){ return (I18N[uiLang]&&I18N[uiLang][key]) || I18N.zh[key] || key; }
+function ZHEN(zh,en){ return uiLang==='en' ? `${zh} / ${en}` : zh; }
+function fieldLabelById(id){ const el=document.getElementById(id); return el?el.closest('.field')?.querySelector('label'):null; }
+function applyI18nToStatic(){
+  document.documentElement.lang=uiLang==='en'?'en':'zh-CN';
+  const sub=document.querySelector('.title-sub'); if(sub) sub.textContent=L('subtitle');
+  const labels={year:'birthYear',month:'month',day:'day',hour:'hour',gender:'gender',localHour:'localHour',utcOffset:'utcOffset',lat:'lat',lon:'lon'};
+  Object.entries(labels).forEach(([id,key])=>{ const l=fieldLabelById(id); if(l) l.textContent=L(key); });
+  const dstField=document.getElementById('dst')?.closest('.field')?.querySelector('label'); if(dstField) dstField.childNodes[0].textContent=L('dst');
+  const g=document.getElementById('gender'); if(g&&g.options.length>=2){ g.options[0].text=L('male'); g.options[1].text=L('female'); }
+  const calc=document.getElementById('calcBtn'); if(calc) calc.textContent=L('calc');
+  const reset=document.getElementById('resetStateBtn'); if(reset) reset.textContent=L('resetState');
+  const lang=document.getElementById('langToggleBtn'); if(lang) lang.textContent=L('langToggle');
+}
+function signNameByLon(lon){
+  const names=['白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手','摩羯','水瓶','双鱼'];
+  return names[Math.floor(nd(lon)/30)];
+}
+function buildAIFold(prompt, scope){
+  const id=`aiPrompt_${scope}`;
+  return `<details class="fold"><summary>${L('aiTitle')}</summary><div class="fold-body"><div class="ai-note">${L('aiNote')}</div><div class="ai-note"><strong>${L('aiPresetTitle')}：</strong></div><div class="ai-actions"><button class="btn-lite" type="button" onclick="applyAIPresetById('${id}','career')">${L('aiPresetCareer')}</button><button class="btn-lite" type="button" onclick="applyAIPresetById('${id}','relationship')">${L('aiPresetRelationship')}</button><button class="btn-lite" type="button" onclick="applyAIPresetById('${id}','health')">${L('aiPresetHealth')}</button><button class="btn-lite" type="button" onclick="applyAIPresetById('${id}','base')">${L('aiPresetReset')}</button></div><div class="ai-actions"><button class="btn-lite" type="button" onclick="copyAIPromptById('${id}')">${L('aiCopy')}</button><button class="btn-lite" type="button" onclick="openChatGPTForReadingById('${id}')">${L('aiOpen')}</button></div><textarea id="${id}" class="ai-prompt" aria-label="AI解盘提示词">${prompt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea></div></details>`;
+}
+function buildAIPrompts(payload){
+  const {year,month,day,hour,gender,localHour,utcOffset,dstOn,lat,lon,bazi}=payload;
+  const ec=countElem(bazi);
+  const dm={c:TG[bazi.day.stem],e:WX_S[bazi.day.stem],yy:YY_S[bazi.day.stem]};
+  const lunarDay=approxLunarDay(year,month,day);
+  const palaceData=buildPalaces(bazi,lunarDay);
+  const mingStars=(palaceData.P.find(p=>p.branchIdx===palaceData.mg)?.stars||[]).filter(s=>s.type==='major').map(s=>s.name).join('、')||'无主星';
+  const astro=getAstroData(year,month,day,localHour,lat,lon,utcOffset,dstOn);
+  const sun=astro.planets['太阳']?.lon ?? 0;
+  const moon=astro.planets['月亮']?.lon ?? 0;
+  const vedic=getVedicGrahas(year,month,day,localHour,lat,lon,utcOffset,dstOn);
+  const moonNk=getNakshatraV(vedic.grahas[1].lon);
+  const dashas=calcVimshottariDasha(vedic.grahas[1].lon,year,month,day);
+  const nowMs=Date.now();
+  const activeDasha=dashas.find(d=>nowMs>=d.startMs&&nowMs<d.endMs);
+  const sx=((year-4)%12+12)%12;
+  const head=`【来访者信息】\n- 公历日期：${year}-${pad2(month)}-${pad2(day)}\n- 八字时辰序号：${hour}（${DZ[hour]}时）\n- 星盘出生时刻：${localHour.toFixed(2)}\n- 时区：UTC${utcOffset>=0?'+':''}${utcOffset}${dstOn?' + DST 1h':''}\n- 坐标：${lat.toFixed(4)}, ${lon.toFixed(4)}\n- 性别：${gender==='m'?'男':'女'}\n\n`;
+  return {
+    bazi:`你是一位八字命理顾问。只基于八字信息解读，不要引用紫薇/西洋/吠陀。\n\n${head}【八字关键】\n- 日主：${dm.c}（${dm.yy}${dm.e}）\n- 五行计数：木${ec['木']} 火${ec['火']} 土${ec['土']} 金${ec['金']} 水${ec['水']}\n- 年柱纳音：${nayin(bazi.year.stem,bazi.year.branch)}\n- 生肖：${SX[sx]}\n\n【输出要求】\n1) 120字以内总评\n2) 事业/财运、感情、健康三段\n3) 给未来6-12个月3条可执行建议\n4) 避免绝对化结论并给出风险提醒。`,
+    ziwei:`你是一位紫薇斗数顾问。只基于紫薇信息解读，不要引用八字/西洋/吠陀。\n\n${head}【紫薇关键】\n- 命宫：${DZ[palaceData.mg]}\n- 命宫主星：${mingStars}\n- 五行局：${['','水二局','木三局','金四局','土五局','火六局'][palaceData.ju+1]||'未知'}\n- 农历日（估）：第${lunarDay}日\n\n【输出要求】\n1) 120字以内总评\n2) 命宫与三方四正重点\n3) 近期行动建议3条\n4) 给出谨慎说明（非决定论）。`,
+    western:`你是一位西洋占星顾问。只基于西洋星盘（整宫）解读，不要引用八字/紫薇/吠陀。\n\n${head}【西洋关键（整宫）】\n- 上升：${signNameByLon(astro.asc)} ${(nd(astro.asc)%30).toFixed(1)}°\n- 天顶：${signNameByLon(astro.mc)} ${(nd(astro.mc)%30).toFixed(1)}°\n- 太阳：${signNameByLon(sun)} ${(nd(sun)%30).toFixed(1)}°\n- 月亮：${signNameByLon(moon)} ${(nd(moon)%30).toFixed(1)}°\n\n【输出要求】\n1) 人格核心/关系模式/事业节奏三部分\n2) 未来12个月3条可执行建议\n3) 风险提醒并避免宿命论。`,
+    vedic:`你是一位吠陀占星顾问。只基于吠陀信息解读，不要引用八字/紫薇/西洋。\n\n${head}【吠陀关键】\n- 命宫(Lagna)：${RASHI_NAMES_SA[vedic.lagnaRashi]} ${(vedic.lagnaLon%30).toFixed(1)}°\n- 月宿：${moonNk.name} 第${moonNk.pada}足\n- 当前大运：${activeDasha?activeDasha.lord:'未落入当前区间'}\n\n【输出要求】\n1) 120字以内总评\n2) 命宫/月宿/大运重点\n3) 近期执行建议3条\n4) 风险提醒与理性建议。`,
+    synthesis:`你是一位综合命理顾问。请整合八字、紫薇、西洋、吠陀四种体系给出交叉验证解读。\n\n${head}【八字关键】\n- 日主：${dm.c}（${dm.yy}${dm.e}）\n- 五行计数：木${ec['木']} 火${ec['火']} 土${ec['土']} 金${ec['金']} 水${ec['水']}\n\n【紫薇关键】\n- 命宫：${DZ[palaceData.mg]}\n- 命宫主星：${mingStars}\n\n【西洋关键】\n- 上升：${signNameByLon(astro.asc)}\n- 太阳：${signNameByLon(sun)}\n- 月亮：${signNameByLon(moon)}\n\n【吠陀关键】\n- 命宫(Lagna)：${RASHI_NAMES_SA[vedic.lagnaRashi]}\n- 月宿：${moonNk.name}\n- 当前大运：${activeDasha?activeDasha.lord:'未落入当前区间'}\n\n【输出要求】\n1) 先给四体系共识（3条）与分歧（2条）\n2) 再给事业/关系/健康三方面综合建议\n3) 给未来12个月3条优先行动\n4) 明确说明仅供自我观察参考。`
+  };
+}
+
+// ===== BaZi =====
+function calcBaZi(year,month,day,hb){
+  const stDay=[6,4,6,5,6,6,7,7,8,8,7,7][month-1];
+  let adjM=(day<stDay&&month>1)?month-1:month;
+  if(day<stDay&&month===1) adjM=12;
+  const yStem=((year-4)%10+10)%10, yBr=((year-4)%12+12)%12;
+  const mBr=(adjM-1+2)%12, mStemBase=[2,4,6,8,0][yStem%5], mStem=(mStemBase+(adjM-1))%10;
+  const dayJD=jd(year,month,day);
+  const dStem=((dayJD-11)%10+10)%10, dBr=((dayJD-11)%12+12)%12;
+  const hStemBase=[0,2,4,6,8][dStem%5], hStem=(hStemBase+hb)%10;
+  return { year:{stem:yStem,branch:yBr}, month:{stem:mStem,branch:mBr}, day:{stem:dStem,branch:dBr}, hour:{stem:hStem,branch:hb} };
+}
+function countElem(bazi){ const c={'木':0,'火':0,'土':0,'金':0,'水':0}; ['year','month','day','hour'].forEach(p=>{c[WX_S[bazi[p].stem]]++;c[WX_B[bazi[p].branch]]++;}); return c; }
+function luckPillars(bazi,gender){ const fwd=(gender==='m'&&YY_S[bazi.year.stem]==='阳')||(gender==='f'&&YY_S[bazi.year.stem]==='阴'); return Array.from({length:8},(_,i)=>{const d=fwd?i+1:-(i+1);return{stem:((bazi.month.stem+d)%10+10)%10,branch:((bazi.month.branch+d)%12+12)%12,age:(i+1)*10-7};}); }
+
+// ===== ZiWei =====
+function mingGong(mBranch,hBranch){ return((mBranch-hBranch)%12+12)%12; }
+function fiveElemJu(yStem,yBranch){ const ny=nayin(yStem,yBranch),elem=ny.slice(-1); return{'水':1,'木':2,'金':3,'土':4,'火':5}[elem]||3; }
+function ziweiPos(ld,juIdx){ const ju=juIdx+1,r=ld%ju; let steps=r===0?ld/ju-1:Math.ceil(ld/ju)-1; if(r>0&&r%2===0) steps=Math.max(0,steps-1); return(2+steps)%12; }
+function buildPalaces(bazi,ld){
+  const mg=mingGong(bazi.month.branch,bazi.hour.branch),ju=fiveElemJu(bazi.year.stem,bazi.year.branch),zwp=ziweiPos(ld,ju);
+  const P=Array.from({length:12},(_,i)=>({index:i,name:PNAMES[i],branchIdx:(mg+i)%12,stars:[],isMing:i===0}));
+  const addStar=(branchIdx,name,type)=>{const bi=((branchIdx%12)+12)%12;const p=P.find(x=>x.branchIdx===bi);if(p) p.stars.push({name,type});};
+  [[0,'紫微'],[-1,'天机'],[-3,'太阳'],[-4,'武曲'],[-5,'天同'],[-8,'廉贞']].forEach(([off,name])=>{ addStar((zwp+off+120)%12,name,'major'); });
+  const tfp=(14-zwp+120)%12;
+  [[0,'天府'],[1,'太阴'],[2,'贪狼'],[3,'巨门'],[4,'天相'],[5,'天梁'],[6,'七杀'],[10,'破军']].forEach(([off,name])=>{ addStar((tfp+off)%12,name,'major'); });
+  const yb=bazi.year.branch,ys=bazi.year.stem;
+  addStar((yb+2)%12,'禄存','minor');
+  addStar([10,7,4,1,10,7,4,1,10,7,4,1][yb],'天马','minor');
+  addStar((10-ys+12)%12,'文昌','aux'); addStar((4+ys)%12,'文曲','aux');
+  addStar([2,2,3,3,3,3,1,1,10,10][ys],'天魁','aux'); addStar([8,8,7,7,7,7,1,1,6,6][ys],'天钺','aux');
+  addStar((1+ld)%12,'左辅','minor'); addStar((11-ld%12+12)%12,'右弼','minor');
+  return{P,mg,zwp,ju};
+}
+
+// ===== Render: BaZi =====
+function renderBaZi(bazi,year,gender,aiPrompt){
+  const lp=luckPillars(bazi,gender),ec=countElem(bazi),maxE=Math.max(...Object.values(ec));
+  const dm={c:TG[bazi.day.stem],e:WX_S[bazi.day.stem],yy:YY_S[bazi.day.stem]};
+  const sx=((year-4)%12+12)%12,ny=nayin(bazi.year.stem,bazi.year.branch);
+  const ecRank=Object.entries(ec).sort((a,b)=>b[1]-a[1]);
+  const strongElem=ecRank[0][0],weakElem=ecRank[ecRank.length-1][0];
+  const balanceHint=ecRank[0][1]-ecRank[ecRank.length-1][1]<=1?'五行相对均衡':'五行偏性较明显';
+  const summary=buildSummaryCard('八字摘要卡',[
+    {k:'日主：',v:`${dm.c}（${dm.yy}${dm.e}）`},
+    {k:'生肖：',v:`${SX[sx]}`},
+    {k:'年柱纳音：',v:ny},
+    {k:'时辰：',v:`${DZ[bazi.hour.branch]}时`}
+  ]);
+  const pillarsHTML=['year','month','day','hour'].map((k,i)=>{const s=bazi[k].stem,b=bazi[k].branch;return`<div class="pillar"><div class="pillar-label">${['年柱','月柱','日柱','时柱'][i]}</div><div class="pillar-stem ${YY_S[s]==='阳'?'yang':'yin'}">${TG[s]}</div><div class="pillar-branch ${YY_B[b]==='阳'?'yang':'yin'}">${DZ[b]}</div><div class="pillar-elem">${WX_S[s]}·${WX_B[b]}</div></div>`;}).join('');
+  const barsHTML=Object.entries(ec).map(([e,c])=>`<div class="elem-bar-wrap"><div class="elem-bar" style="height:${maxE>0?Math.max(c/maxE*72,6):6}px;background:${EC[e]};opacity:0.8;"></div><div class="elem-bar-label" style="color:${EC[e]}">${e}</div><div class="elem-bar-count">${c}</div></div>`).join('');
+  const lpHTML=lp.map(p=>`<div class="luck-pill"><div class="luck-age">${p.age}岁</div><div style="font-family:'Ma Shan Zheng',serif;font-size:1.25rem;color:${YY_S[p.stem]==='阳'?'#1a3a5c':'#8b1a1a'}">${TG[p.stem]}</div><div style="font-family:'Ma Shan Zheng',serif;font-size:1.25rem;color:${YY_B[p.branch]==='阳'?'#1a3a5c':'#8b1a1a'}">${DZ[p.branch]}</div></div>`).join('');
+  const detailHTML=`<div class="pillars">${pillarsHTML}</div><div class="info-grid"><div class="info-card"><h4>日主</h4><div class="val">${dm.c} · ${dm.e}</div><div class="sub">${dm.yy}${dm.e}日主</div></div><div class="info-card"><h4>生肖</h4><div class="val">${SX[sx]}</div><div class="sub">${DZ[bazi.year.branch]}年</div></div><div class="info-card"><h4>年柱纳音</h4><div class="val">${ny}</div><div class="sub">${TG[bazi.year.stem]}${DZ[bazi.year.branch]}年</div></div><div class="info-card"><h4>时辰地支</h4><div class="val">${DZ[bazi.hour.branch]}时</div><div class="sub">${WX_B[bazi.hour.branch]}属性</div></div></div><div class="five-elems"><h3>五行分布（八字共8字）</h3><div class="elem-bars">${barsHTML}</div></div><div class="luck-pillars"><h3>大运（每柱十年）</h3><div class="luck-row">${lpHTML}</div></div>`;
+  const readHTML=`<div class="info-grid"><div class="info-card"><h4>五行倾向</h4><div class="val">${strongElem}偏强 · ${weakElem}偏弱</div><div class="sub">${balanceHint}</div></div><div class="info-card"><h4>性格主轴</h4><div class="val">${dm.yy}${dm.e}日主</div><div class="sub">先看日主，再参考月令与大运变化</div></div><div class="info-card"><h4>解读建议</h4><div class="val">先天 + 运势结合</div><div class="sub">先读四柱结构，再读十年大运节奏</div></div></div>`;
+  return`<div class="section-heading">${ZHEN('四柱八字','BaZi')}</div>${summary}${buildAIFold(aiPrompt,'bazi')}${buildCollapsible(L('foldDetail'),detailHTML,true)}${buildCollapsible(L('foldBasic'),readHTML,false)}`;
+}
+
+// ===== Render: ZiWei =====
+function renderZiWei(bazi,year,month,day,aiPrompt){
+  const ld=approxLunarDay(year,month,day);
+  const{P,mg,ju}=buildPalaces(bazi,ld);
+  const byBr={};P.forEach(p=>{byBr[p.branchIdx]=p;});
+  const cell=(br,gridPos)=>{const p=byBr[((br%12)+12)%12];if(!p)return`<div class="palace" style="${gridPos}"></div>`;const starsHTML=p.stars.map(s=>`<span class="star ${s.type}">${s.name}</span>`).join('');return`<div class="palace${p.isMing?' highlight':''}" style="${gridPos}">${p.isMing?'<span class="palace-self-tag">◈ 命宫</span>':''}<div class="palace-header"><span>${p.name}</span><span class="palace-branch-lbl">${DZ[p.branchIdx]}</span></div><div class="palace-stars">${starsHTML}</div></div>`;};
+  const dm={c:TG[bazi.day.stem],e:WX_S[bazi.day.stem],yy:YY_S[bazi.day.stem]};
+  const sx=((year-4)%12+12)%12,juN=['','水二局','木三局','金四局','土五局','火六局'][ju+1]||'';
+  const mingStars=(byBr[mg]?.stars||[]).filter(s=>s.type==='major').map(s=>s.name).join('·')||'无主星';
+  const summary=buildSummaryCard('紫薇摘要卡',[
+    {k:'命宫：',v:`${DZ[mg]}`},
+    {k:'主星：',v:mingStars},
+    {k:'五行局：',v:juN||'未知'},
+    {k:'农历日(估)：',v:`第${ld}日`}
+  ]);
+  const grid=`${cell(5,'grid-column:1;grid-row:1')}${cell(6,'grid-column:2;grid-row:1')}${cell(7,'grid-column:3;grid-row:1')}${cell(8,'grid-column:4;grid-row:1')}${cell(4,'grid-column:1;grid-row:2')}<div class="ziwei-center" style="grid-column:2/4;grid-row:2/4;"><div class="ziwei-center-title">紫薇命盘</div><div class="ziwei-center-info">农历约第${ld}日<br>日主 ${dm.c}（${dm.yy}${dm.e}）<br>生肖 ${SX[sx]}<br>${juN}</div></div>${cell(9,'grid-column:4;grid-row:2')}${cell(3,'grid-column:1;grid-row:3')}${cell(10,'grid-column:4;grid-row:3')}${cell(2,'grid-column:1;grid-row:4')}${cell(1,'grid-column:2;grid-row:4')}${cell(0,'grid-column:3;grid-row:4')}${cell(11,'grid-column:4;grid-row:4')}`;
+  const detailHTML=`<div class="h-scroll"><div class="ziwei-grid">${grid}</div></div><div class="info-grid"><div class="info-card"><h4>命宫地支</h4><div class="val">${DZ[mg]}</div><div class="sub">命宫所在宫位</div></div><div class="info-card"><h4>命宫主星</h4><div class="val">${mingStars}</div><div class="sub">命宫落星</div></div><div class="info-card"><h4>五行局</h4><div class="val">${juN}</div><div class="sub">${nayin(bazi.year.stem,bazi.year.branch)}</div></div><div class="info-card"><h4>农历日（估算）</h4><div class="val">${ld<=10?'初'+ld:ld+'日'}</div><div class="sub">用于星曜布盘</div></div></div>`;
+  const readHTML=`<div class="info-grid"><div class="info-card"><h4>命宫主轴</h4><div class="val">${DZ[mg]}宫 · ${mingStars}</div><div class="sub">命宫与主星决定人格核心表达</div></div><div class="info-card"><h4>局数参考</h4><div class="val">${juN}</div><div class="sub">结合四化与流年可细化事件节奏</div></div><div class="info-card"><h4>解读建议</h4><div class="val">先命宫后三方四正</div><div class="sub">先看命迁财官，再展开宫位关系</div></div></div>`;
+  return`<div class="section-heading">${ZHEN('紫薇斗数','ZiWei')}</div>${summary}${buildAIFold(aiPrompt,'ziwei')}${buildCollapsible(L('foldDetail'),detailHTML,true)}${buildCollapsible(L('foldBasic'),readHTML,false)}`;
+}
+
+// ===== Western Natal Chart =====
+const RAD=Math.PI/180,DEG=180/Math.PI;
+function toR(d){return d*RAD;} function toD(r){return r*DEG;}
+function nd(d){return((d%360)+360)%360;}
+
+// Keplerian elements [a,e,I,L,w̃,Ω] + rates/century
+const KEL={
+  Mercury:[[0.38710,0.20563,7.00498,252.25032,77.45779,48.33076],[0,0.00002,-0.00590,149472.67411,0.15940,-0.12534]],
+  Venus:  [[0.72333,0.00677,3.39468,181.97910,131.60246,76.67984],[0,-0.00004,-0.00772,58517.81538,0.05688,-0.27769]],
+  Earth:  [[1.00000,0.01671,-0.00001,100.46457,102.93768,0],[0,-0.00004,-0.01294,35999.37244,0.32327,0]],
+  Mars:   [[1.52371,0.09340,1.84969,-4.55343,-23.94362,49.55953],[0.00001,0.00008,-0.00813,19140.30268,0.44441,-0.29257]],
+  Jupiter:[[5.20289,0.04839,1.30440,34.39644,14.72847,100.47390],[-0.00011,-0.00013,-0.00183,3034.74612,0.21878,0.20469]],
+  Saturn: [[9.53667,0.05386,2.48446,49.95424,92.59887,113.66242],[-0.00125,-0.00050,0.00193,1222.49362,-0.41897,-0.28867]],
+  Uranus: [[19.18917,0.04716,0.77263,313.23810,170.95427,74.01693],[-0.00197,-0.00004,-0.00180,428.48202,0.40805,0.04840]],
+  Neptune:[[30.06993,0.00859,1.77004,-55.12072,44.96476,131.78422],[0.00026,0.00005,0.00022,218.45945,-0.32999,-0.00805]],
+  Pluto:  [[39.48168,0.24883,17.14175,238.92881,224.06676,110.30347],[-0.00076,0.00006,0.00004,145.18016,0.04752,0]],
+};
+
+function keplerSolve(Md,e){
+  let E=Md;
+  for(let i=0;i<50;i++){const dE=(Md-E+toD(e*Math.sin(toR(E))))/(1-e*Math.cos(toR(E)));E+=dE;if(Math.abs(dE)<1e-9)break;}
+  return nd(E);
+}
+function helioPos(T,el,rt){
+  const a=el[0]+rt[0]*T,e=el[1]+rt[1]*T;
+  const L=nd(el[3]+rt[3]*T),w=nd(el[4]+rt[4]*T),M=nd(L-w);
+  const E=keplerSolve(M,e);
+  const xv=a*(Math.cos(toR(E))-e),yv=a*Math.sqrt(1-e*e)*Math.sin(toR(E));
+  return{lon:nd(w+toD(Math.atan2(yv,xv))),r:Math.sqrt(xv*xv+yv*yv)};
+}
+
+function calcJDE(year,month,day,utH){
+  let y=year,m=month,d=day+utH/24;
+  if(m<=2){y--;m+=12;}
+  const A=Math.floor(y/100),B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;
+}
+
+function sunLon(T){
+  const L0=nd(280.46646+36000.76983*T+0.0003032*T*T);
+  const M=nd(357.52911+35999.05029*T-0.0001537*T*T),Mr=toR(M);
+  const C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(Mr)+(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
+  return nd(L0+C);
+}
+function moonLon(T){
+  const L=nd(218.3165+481267.8813*T),M=nd(357.5291+35999.0503*T);
+  const Mp=nd(134.9634+477198.8676*T),D=nd(297.8502+445267.1115*T),F=nd(93.2720+483202.0175*T);
+  return nd(L+6.2888*Math.sin(toR(Mp))+1.2740*Math.sin(toR(2*D-Mp))+0.6583*Math.sin(toR(2*D))+0.2136*Math.sin(toR(2*Mp))-0.1851*Math.sin(toR(M))-0.1143*Math.sin(toR(2*F))+0.0588*Math.sin(toR(2*D-2*Mp))+0.0572*Math.sin(toR(2*D-M-Mp))+0.0533*Math.sin(toR(2*D+Mp)));
+}
+
+function getAstroData(year,month,day,localHour,lat,geoLon,utcOffset,dstOn){
+  const effectiveOffset=utcOffset+(dstOn?1:0);
+  const norm=normalizeUtcDate(year,month,day,localHour-effectiveOffset);
+  const jde=calcJDE(norm.year,norm.month,norm.day,norm.utHour);
+  const T=(jde-2451545.0)/36525;
+
+  // Earth position
+  const earth=helioPos(T,KEL.Earth[0],KEL.Earth[1]);
+  const ex=earth.r*Math.cos(toR(earth.lon)),ey=earth.r*Math.sin(toR(earth.lon));
+
+  // All planets geocentric
+  const planets={};
+  const pInfo={
+    Mercury:{zh:'水星',sym:'☿',col:'#7f8c8d'},
+    Venus:  {zh:'金星',sym:'♀',col:'#e8b4b8'},
+    Mars:   {zh:'火星',sym:'♂',col:'#e74c3c'},
+    Jupiter:{zh:'木星',sym:'♃',col:'#e67e22'},
+    Saturn: {zh:'土星',sym:'♄',col:'#8e6b2e'},
+    Uranus: {zh:'天王星',sym:'♅',col:'#1abc9c'},
+    Neptune:{zh:'海王星',sym:'♆',col:'#2980b9'},
+    Pluto:  {zh:'冥王星',sym:'♇',col:'#8e44ad'},
+  };
+  Object.entries(pInfo).forEach(([k,v])=>{
+    const p=helioPos(T,KEL[k][0],KEL[k][1]);
+    const px=p.r*Math.cos(toR(p.lon))-ex,py=p.r*Math.sin(toR(p.lon))-ey;
+    planets[v.zh]={lon:nd(toD(Math.atan2(py,px))),sym:v.sym,col:v.col};
+  });
+  planets['太阳']={lon:sunLon(T),sym:'☉',col:'#e67e22'};
+  planets['月亮']={lon:moonLon(T),sym:'☽',col:'#95a5a6'};
+
+  // Ordered list
+  const order=['太阳','月亮','水星','金星','火星','木星','土星','天王星','海王星','冥王星'];
+  const ordered={};
+  order.forEach(k=>{if(planets[k])ordered[k]=planets[k];});
+
+  // GMST → LST → ASC
+  const gmst=nd(280.46061837+360.98564736629*(jde-2451545)+0.000387933*T*T-T*T*T/38710000);
+  const lst=nd(gmst+geoLon);
+  const eps=23.439291111-0.013004167*T;
+  const lstR=toR(lst),epsR=toR(eps),latR=toR(lat);
+  const asc=nd(toD(Math.atan2(Math.cos(lstR),-(Math.sin(lstR)*Math.cos(epsR)+Math.tan(latR)*Math.sin(epsR)))));
+  const mc=nd(toD(Math.atan2(Math.sin(lstR),Math.cos(lstR)*Math.cos(epsR))));
+
+  return{planets:ordered,asc,mc,jde};
+}
+
+function renderNatalChart(year,month,day,localHour,lat,geoLon,utcOffset,dstOn,aiPrompt){
+  const{planets,asc,mc}=getAstroData(year,month,day,localHour,lat,geoLon,utcOffset,dstOn);
+
+  const CX=260,CY=260,RO=238,RS=205,RH=172,RP=148,RI=90;
+
+  // lon → SVG angle: ASC at left (180°), IC at bottom (90°), DC at right (0°), MC at top (270°)
+  function la(lon){return nd(180-(lon-asc));}
+  function lxy(lon,r){const a=toR(la(lon));return[CX+r*Math.cos(a),CY+r*Math.sin(a)];}
+
+  const SIGN_ZH=['白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手','摩羯','水瓶','双鱼'];
+  const SIGN_SYM=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+  const SIGN_ELEM=['fire','earth','air','water','fire','earth','air','water','fire','earth','air','water'];
+  const ECOL={fire:'#c0392b',earth:'#8b6914',air:'#2471a3',water:'#1a6b8a'};
+
+  let svg=`<svg id="natalSvg" viewBox="0 0 520 520" width="100%" style="max-width:520px;display:block;margin:0 auto;font-family:serif;">`;
+
+  // Background circles
+  svg+=`<circle cx="${CX}" cy="${CY}" r="${RO}" fill="#fdf6ec" stroke="#c8b48a" stroke-width="1.5"/>`;
+  svg+=`<circle cx="${CX}" cy="${CY}" r="${RS}" fill="#f5ebe0" stroke="#c8b48a" stroke-width="1"/>`;
+  svg+=`<circle cx="${CX}" cy="${CY}" r="${RH}" fill="#fdf6ec" stroke="#c8b48a" stroke-width="0.8"/>`;
+  svg+=`<circle cx="${CX}" cy="${CY}" r="${RI}" fill="rgba(255,250,245,0.96)" stroke="#c8b48a" stroke-width="0.8"/>`;
+
+  // Zodiac sign sectors
+  for(let i=0;i<12;i++){
+    const lon1=i*30,lon2=lon1+30;
+    const col=ECOL[SIGN_ELEM[i]];
+    const[ox1,oy1]=lxy(lon1,RO),[ox2,oy2]=lxy(lon2,RO);
+    const[sx1,sy1]=lxy(lon1,RS),[sx2,sy2]=lxy(lon2,RS);
+    svg+=`<path d="M${ox1},${oy1} A${RO},${RO} 0 0,0 ${ox2},${oy2} L${sx2},${sy2} A${RS},${RS} 0 0,1 ${sx1},${sy1} Z" fill="${col}" fill-opacity="0.12" stroke="${col}" stroke-width="0.5" stroke-opacity="0.5"/>`;
+    // Divider lines at sign boundaries
+    const[dx1,dy1]=lxy(lon1,RS),[dx2,dy2]=lxy(lon1,RO);
+    svg+=`<line x1="${dx1}" y1="${dy1}" x2="${dx2}" y2="${dy2}" stroke="${col}" stroke-width="0.8" stroke-opacity="0.6"/>`;
+    // Sign symbol at mid-sign
+    const[mx,my]=lxy(lon1+15,(RO+RS)/2);
+    svg+=`<text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="${col}" font-weight="bold">${SIGN_SYM[i]}</text>`;
+  }
+
+  // House cusps (Whole Sign): 1st house starts at ASC's sign
+  const ascSign=Math.floor(asc/30);
+  for(let h=0;h<12;h++){
+    const hLon=(ascSign+h)*30;
+    const[hx1,hy1]=lxy(hLon,RI),[hx2,hy2]=lxy(hLon,RH);
+    const isAngular=(h===0||h===3||h===6||h===9);
+    svg+=`<line x1="${hx1}" y1="${hy1}" x2="${hx2}" y2="${hy2}" stroke="#8b7355" stroke-width="${isAngular?1.5:0.6}" stroke-dasharray="${isAngular?'':'2,3'}" stroke-opacity="${isAngular?0.9:0.5}"/>`;
+    // House number
+    const[hnx,hny]=lxy(hLon+15,(RH+RI)/2);
+    svg+=`<text x="${hnx}" y="${hny}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#8b7355" font-weight="${isAngular?'bold':'normal'}">${h+1}</text>`;
+  }
+
+  // Aspect lines
+  const ASPECTS=[{a:0,orb:8,col:'#c9942a'},{a:60,orb:5,col:'#2980b9'},{a:90,orb:6,col:'#c0392b'},{a:120,orb:7,col:'#27ae60'},{a:180,orb:8,col:'#8e44ad'}];
+  const pArr=Object.values(planets);
+  for(let i=0;i<pArr.length;i++){
+    for(let j=i+1;j<pArr.length;j++){
+      const diff=Math.abs(nd(pArr[i].lon-pArr[j].lon));
+      const ang=Math.min(diff,360-diff);
+      for(const asp of ASPECTS){
+        const orb=Math.abs(ang-asp.a);
+        if(orb<=asp.orb){
+          const[ax,ay]=lxy(pArr[i].lon,RI-4),[bx,by]=lxy(pArr[j].lon,RI-4);
+          const op=0.15+0.45*(1-orb/asp.orb);
+          svg+=`<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${asp.col}" stroke-width="0.9" stroke-opacity="${op}"/>`;
+        }
+      }
+    }
+  }
+
+  // Planet placement with simple collision avoidance
+  const pEntries=Object.entries(planets);
+  const displayLons=pEntries.map(([,p])=>p.lon);
+  // Spread overlapping planets
+  for(let iter=0;iter<30;iter++){
+    let changed=false;
+    for(let i=0;i<displayLons.length;i++){
+      for(let j=i+1;j<displayLons.length;j++){
+        let diff=nd(displayLons[j]-displayLons[i]);
+        if(diff>180)diff-=360;
+        if(Math.abs(diff)<8){
+          displayLons[i]=nd(displayLons[i]-0.5);
+          displayLons[j]=nd(displayLons[j]+0.5);
+          changed=true;
+        }
+      }
+    }
+    if(!changed)break;
+  }
+
+  pEntries.forEach(([name,p],idx)=>{
+    const dLon=displayLons[idx];
+    // Dot on actual position (on house ring)
+    const[ax,ay]=lxy(p.lon,RH-4);
+    svg+=`<circle cx="${ax}" cy="${ay}" r="2.5" fill="${p.col}"/>`;
+    // Thin tick line to planet zone
+    const[px,py]=lxy(dLon,RP);
+    if(Math.abs(nd(dLon-p.lon))>1){
+      const[lx1,ly1]=lxy(p.lon,RH-4),[lx2,ly2]=lxy(dLon,RP+12);
+      svg+=`<line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${p.col}" stroke-width="0.5" stroke-opacity="0.4"/>`;
+    }
+    // Planet symbol
+    svg+=`<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="${p.col}" font-weight="bold">${p.sym}</text>`;
+  });
+
+  // ASC line and label
+  const[ax1,ay1]=lxy(asc,RO),[ax2,ay2]=lxy(asc,RI);
+  svg+=`<line x1="${ax1}" y1="${ay1}" x2="${ax2}" y2="${ay2}" stroke="#c9942a" stroke-width="2"/>`;
+  const[alx,aly]=lxy(asc+1,RO-10);
+  svg+=`<text x="${alx}" y="${aly}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#c9942a" font-weight="bold">AC</text>`;
+
+  // MC line and label
+  const[mx1,my1]=lxy(mc,RO),[mx2,my2]=lxy(mc,RI);
+  svg+=`<line x1="${mx1}" y1="${my1}" x2="${mx2}" y2="${my2}" stroke="#8b1a1a" stroke-width="2"/>`;
+  const[mlx,mly]=lxy(mc+1,RO-10);
+  svg+=`<text x="${mlx}" y="${mly}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#8b1a1a" font-weight="bold">MC</text>`;
+
+  // Center label
+  svg+=`<text x="${CX}" y="${CY-8}" text-anchor="middle" font-size="11" fill="#8b7355" font-family="Ma Shan Zheng,serif">西洋星盘</text>`;
+  svg+=`<text x="${CX}" y="${CY+10}" text-anchor="middle" font-size="9" fill="#b0977a">整宫制</text>`;
+
+  svg+=`</svg>`;
+
+  // Planet data table
+  const signNames=['白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手','摩羯','水瓶','双鱼'];
+  const retroHint='(逆)';// would need velocity calc for proper retrograde detection
+  let tbl=`<div class="planet-table"><table><thead><tr><th>星体</th><th>黄道度数</th><th>星座</th><th>宫位（整宫）</th><th>元素</th></tr></thead><tbody>`;
+  const elemOf=(lon)=>['火','土','风','水'][Math.floor(lon/30)%4];
+  const elemColOf=(lon)=>['#c0392b','#8b6914','#2980b9','#1a6b8a'][Math.floor(lon/30)%4];
+
+  const allForTable={...planets,'上升点':{lon:asc,sym:'AC',col:'#c9942a'},'天顶MC':{lon:mc,sym:'MC',col:'#8b1a1a'}};
+  Object.entries(allForTable).forEach(([name,p])=>{
+    const si=Math.floor(nd(p.lon)/30),deg=(nd(p.lon)%30).toFixed(2);
+    const house=((Math.floor(nd(p.lon-(ascSign*30))/30))%12)+1;
+    tbl+=`<tr><td><span style="color:${p.col};font-weight:700">${p.sym}</span> ${name}</td><td>${si>0?SIGN_SYM[si]:'♈'}${deg}°</td><td>${signNames[si]}</td><td>第${house}宫</td><td style="color:${elemColOf(p.lon)}">${elemOf(p.lon)}</td></tr>`;
+  });
+  tbl+=`</tbody></table></div>`;
+
+  const aspLegend=`<div class="aspect-legend"><div class="asp-item"><div class="asp-line" style="background:#c9942a"></div>合相(0°)</div><div class="asp-item"><div class="asp-line" style="background:#27ae60"></div>三合(120°)</div><div class="asp-item"><div class="asp-line" style="background:#c0392b"></div>刑克(90°)</div><div class="asp-item"><div class="asp-line" style="background:#8e44ad"></div>对冲(180°)</div><div class="asp-item"><div class="asp-line" style="background:#2980b9"></div>六合(60°)</div></div>`;
+
+  const ascInfo=`<div class="info-grid" style="margin-top:20px"><div class="info-card"><h4>上升星座</h4><div class="val">${SIGN_SYM[Math.floor(asc/30)]} ${signNames[Math.floor(asc/30)]}</div><div class="sub">AC ${(asc%30).toFixed(1)}°</div></div><div class="info-card"><h4>天顶星座</h4><div class="val">${SIGN_SYM[Math.floor(mc/30)]} ${signNames[Math.floor(mc/30)]}</div><div class="sub">MC ${(mc%30).toFixed(1)}°</div></div><div class="info-card"><h4>太阳星座</h4><div class="val">${SIGN_SYM[Math.floor(nd(planets['太阳'].lon)/30)]} ${signNames[Math.floor(nd(planets['太阳'].lon)/30)]}</div><div class="sub">☉ ${(nd(planets['太阳'].lon)%30).toFixed(1)}°</div></div><div class="info-card"><h4>月亮星座</h4><div class="val">${SIGN_SYM[Math.floor(nd(planets['月亮'].lon)/30)]} ${signNames[Math.floor(nd(planets['月亮'].lon)/30)]}</div><div class="sub">☽ ${(nd(planets['月亮'].lon)%30).toFixed(1)}°</div></div></div>`;
+
+  const summary=buildSummaryCard('西洋星盘摘要卡',[
+    {k:'上升：',v:`${SIGN_SYM[Math.floor(asc/30)]} ${signNames[Math.floor(asc/30)]} ${(asc%30).toFixed(1)}°`},
+    {k:'天顶：',v:`${SIGN_SYM[Math.floor(mc/30)]} ${signNames[Math.floor(mc/30)]} ${(mc%30).toFixed(1)}°`},
+    {k:'太阳：',v:`${SIGN_SYM[Math.floor(nd(planets['太阳'].lon)/30)]} ${signNames[Math.floor(nd(planets['太阳'].lon)/30)]}`},
+    {k:'月亮：',v:`${SIGN_SYM[Math.floor(nd(planets['月亮'].lon)/30)]} ${signNames[Math.floor(nd(planets['月亮'].lon)/30)]}`}
+  ]);
+  const detailHTML=`<div class="natal-wrap">${svg}${aspLegend}</div>${ascInfo}<div class="planet-table" style="margin-top:20px">${tbl}</div>`;
+  const readHTML=`<div class="info-grid"><div class="info-card"><h4>人格外显</h4><div class="val">上升 ${SIGN_SYM[Math.floor(asc/30)]} ${signNames[Math.floor(asc/30)]}</div><div class="sub">外在风格与第一印象</div></div><div class="info-card"><h4>核心动力</h4><div class="val">太阳 ${SIGN_SYM[Math.floor(nd(planets['太阳'].lon)/30)]} ${signNames[Math.floor(nd(planets['太阳'].lon)/30)]}</div><div class="sub">主导意志与自我驱动</div></div><div class="info-card"><h4>情绪模式</h4><div class="val">月亮 ${SIGN_SYM[Math.floor(nd(planets['月亮'].lon)/30)]} ${signNames[Math.floor(nd(planets['月亮'].lon)/30)]}</div><div class="sub">安全感来源与情绪习惯</div></div></div>`;
+  return`<div class="section-heading">${ZHEN('西洋星盘','Western')}</div>${summary}${buildAIFold(aiPrompt,'western')}${buildCollapsible(L('foldDetail'),detailHTML,true)}${buildCollapsible(L('foldBasic'),readHTML,false)}`;
+}
+
+// ===================================================================
+//  VEDIC ASTROLOGY (JYOTISH)
+// ===================================================================
+
+// Lahiri Chitrapaksha Ayanamsha (degrees)
+function lahiriAyanamsha(JDE) {
+  const Ty = (JDE - 2451545.0) / 365.25;
+  return nd(23.85273 + 0.013969 * Ty);
+}
+
+// Mean Rahu (Ascending Node), tropical (T = Julian centuries)
+function meanRahuTrop(T) {
+  return nd(125.0445479 - 1934.1362608*T + 0.0020754*T*T);
+}
+
+const RASHI_NAMES_SA = ['Mesha','Vrishabha','Mithuna','Karka','Simha','Kanya','Tula','Vrischika','Dhanus','Makara','Kumbha','Meena'];
+const RASHI_SYM_W    = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const RASHI_ZH_V     = ['白羊(牡羊)','金牛(公牛)','双子(双鱼)','巨蟹','狮子','处女','天秤','天蝎','射手','摩羯','水瓶','双鱼'];
+
+// South Indian chart grid: 16 positions (row-major), value = rashi number 1-12, 0=center
+const SI_GRID_RASHIS = [12,1,2,3, 11,0,0,4, 10,0,0,5, 9,8,7,6];
+// CSS grid (col, row) for each of the 16 positions
+const SI_GRID_CSS = [[1,1],[2,1],[3,1],[4,1],[1,2],[0,0],[0,0],[4,2],[1,3],[0,0],[0,0],[4,3],[1,4],[2,4],[3,4],[4,4]];
+
+const NAKSHATRA_NAMES_V = [
+  'Ashwini','Bharani','Krittika','Rohini','Mrigashira','Ardra',
+  'Punarvasu','Pushya','Ashlesha','Magha','Purva Phalguni','Uttara Phalguni',
+  'Hasta','Chitra','Swati','Vishakha','Anuradha','Jyeshtha',
+  'Mula','Purva Ashadha','Uttara Ashadha','Shravana','Dhanishtha','Shatabhisha',
+  'Purva Bhadrapada','Uttara Bhadrapada','Revati'
+];
+
+// Vimshottari Dasha: lord sequence & years
+const DASHA_LORDS_V = ['Ke','Ve','Su','Mo','Ma','Ra','Ju','Sa','Bu'];
+const DASHA_LORDS_ZH= ['计都','金星','太阳','月亮','火星','罗睺','木星','土星','水星'];
+const DASHA_YRS     = [7,20,6,10,7,18,16,19,17]; // total 120
+
+// Graha info: [name_sa, name_zh, symbol, color]
+const GRAHA_V = [
+  ['Surya',  '苏利耶(太阳)','☉','#f0a020'],
+  ['Chandra','钱德拉(月亮)','☽','#b0b8d0'],
+  ['Mangal', '芒嘎尔(火星)','♂','#e04040'],
+  ['Budha',  '布达(水星)', '☿','#44aa44'],
+  ['Guru',   '古儒(木星)', '♃','#d4a040'],
+  ['Shukra', '舒克拉(金星)','♀','#eecc55'],
+  ['Shani',  '沙尼(土星)', '♄','#8888bb'],
+  ['Rahu',   '罗睺(北交)', '☊','#aaaaaa'],
+  ['Ketu',   '计都(南交)', '☋','#cc8844'],
+];
+
+// Own signs (rashi idx 0-11 = Mesha-Meena)
+const V_OWN   = [[4],[3],[0,7],[2,5],[8,11],[1,6],[9,10],[],[]];
+// Moolatrikona sign  
+const V_MOOL  = [4,3,0,2,8,1,9,-1,-1];
+// Exaltation / Debilitation
+const V_EXALT = [0,1,9,5,3,11,6,-1,-1];
+const V_DEBIL = [6,7,3,11,9,5,0,-1,-1];
+// Exaltation degree (approximate)
+const V_EXALT_DEG = [10,3,28,15,5,27,20,-1,-1];
+
+function getVDignity(gi, rashiIdx, lon) {
+  if (gi >= 7) return 'neutral';
+  // Check exact exaltation degree (within 2°)
+  if (V_EXALT[gi] === rashiIdx) return 'exalted';
+  if (V_DEBIL[gi] === rashiIdx) return 'debilitated';
+  if (V_MOOL[gi] === rashiIdx) return 'moolatrikona';
+  if (V_OWN[gi].includes(rashiIdx)) return 'own';
+  return 'neutral';
+}
+
+function getNakshatraV(lon) {
+  const size = 360/27;
+  const idx  = Math.floor(lon / size);
+  const frac = (lon - idx * size) / size;
+  const pada = Math.floor(frac * 4) + 1;
+  const lordIdx = idx % 9;
+  return { idx, name: NAKSHATRA_NAMES_V[idx], pada, lordIdx, frac };
+}
+
+function calcVimshottariDasha(moonSidLon, birthYear, birthMonth, birthDay) {
+  const nk = getNakshatraV(moonSidLon);
+  const lordIdx = nk.lordIdx;
+  const fracRemaining = 1 - nk.frac;
+  const firstYears    = fracRemaining * DASHA_YRS[lordIdx];
+  const birthMs       = Date.UTC(birthYear, birthMonth-1, birthDay);
+  const YRSMS         = 365.25 * 86400000;
+
+  const dashas = [];
+  let curMs = birthMs;
+
+  // First partial dasha
+  const firstEndMs = curMs + firstYears * YRSMS;
+  dashas.push({ lord: DASHA_LORDS_ZH[lordIdx], sym: DASHA_LORDS_V[lordIdx], years: firstYears, startMs: curMs, endMs: firstEndMs, partial: true });
+  curMs = firstEndMs;
+
+  for (let i=1; i<=9; i++) {
+    const idx = (lordIdx + i) % 9;
+    const yrs = DASHA_YRS[idx];
+    const endMs = curMs + yrs * YRSMS;
+    dashas.push({ lord: DASHA_LORDS_ZH[idx], sym: DASHA_LORDS_V[idx], years: yrs, startMs: curMs, endMs, partial: false });
+    curMs = endMs;
+  }
+  return dashas;
+}
+
+function fmtDate(ms) {
+  const d = new Date(ms);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+}
+
+function getVedicGrahas(year, month, day, localHour, lat, geoLon, utcOffset, dstOn) {
+  const effectiveOffset = utcOffset + (dstOn ? 1 : 0);
+  const norm = normalizeUtcDate(year, month, day, localHour - effectiveOffset);
+  const JDE = calcJDE(norm.year, norm.month, norm.day, norm.utHour);
+  const T   = (JDE - 2451545.0) / 36525;
+  const ayan = lahiriAyanamsha(JDE);
+
+  // Reuse existing tropical calculation
+  const { planets: trPlanets, asc: trAsc } = getAstroData(year, month, day, localHour, lat, geoLon, utcOffset, dstOn);
+
+  // Map tropical → sidereal for classical 7 planets
+  const ZH_KEYS = ['太阳','月亮','火星','水星','木星','金星','土星'];
+  const grahas = ZH_KEYS.map((k, gi) => {
+    const sidLon = nd((trPlanets[k]?.lon ?? 0) - ayan);
+    const rashiIdx = Math.floor(sidLon / 30);
+    const dignity  = getVDignity(gi, rashiIdx, sidLon);
+    return { name_sa: GRAHA_V[gi][0], name_zh: GRAHA_V[gi][1], sym: GRAHA_V[gi][2], col: GRAHA_V[gi][3], lon: sidLon, rashiIdx, dignity };
+  });
+
+  // Rahu & Ketu (mean nodes, sidereal)
+  const rahuTrop = meanRahuTrop(T);
+  const rahuSid  = nd(rahuTrop - ayan);
+  const ketuSid  = nd(rahuSid + 180);
+  [rahuSid, ketuSid].forEach((lon, i) => {
+    const gi = 7 + i;
+    grahas.push({ name_sa: GRAHA_V[gi][0], name_zh: GRAHA_V[gi][1], sym: GRAHA_V[gi][2], col: GRAHA_V[gi][3], lon, rashiIdx: Math.floor(lon/30), dignity: 'neutral' });
+  });
+
+  // Sidereal ASC (Lagna)
+  const lagnaLon  = nd(trAsc - ayan);
+  const lagnaRashi= Math.floor(lagnaLon / 30);
+
+  return { grahas, ayan, lagnaLon, lagnaRashi, JDE };
+}
+
+// ===== Render: Vedic =====
+function renderVedic(year, month, day, localHour, lat, geoLon, utcOffset, dstOn, aiPrompt) {
+  const { grahas, ayan, lagnaLon, lagnaRashi } = getVedicGrahas(year, month, day, localHour, lat, geoLon, utcOffset, dstOn);
+
+  // Group grahas by rashi index (0-11)
+  const rashiPlanets = {};
+  grahas.forEach((g, gi) => {
+    if (!rashiPlanets[g.rashiIdx]) rashiPlanets[g.rashiIdx] = [];
+    rashiPlanets[g.rashiIdx].push({ ...g, gi });
+  });
+
+  // Dignity color map
+  const DCOL = { exalted:'#d4a020', debilitated:'#dd5555', own:'#5599ee', moolatrikona:'#44bb66', neutral:'#7a6040' };
+
+  // Build South Indian grid cells
+  const buildCell = (siIdx) => {
+    const rashiNum = SI_GRID_RASHIS[siIdx]; // 1-12
+    if (rashiNum === 0) return ''; // center
+    const rashiIdx = rashiNum - 1; // 0-11
+    const [c,r]   = SI_GRID_CSS[siIdx];
+    const isLagna = rashiIdx === lagnaRashi;
+    const planets = rashiPlanets[rashiIdx] || [];
+    const planetsHTML = planets.map(p => {
+      const abbr = p.name_sa.slice(0,2).toUpperCase();
+      return `<span class="graha-tag ${p.dignity}" title="${p.name_zh} ${p.lon.toFixed(1)}° - ${p.dignity}" style="color:${DCOL[p.dignity]}">${p.sym}${abbr}</span>`;
+    }).join('');
+    return `<div class="rashi-cell${isLagna?' lagna':''}" style="grid-column:${c};grid-row:${r}">
+      ${isLagna ? `<div class="lagna-mark">◈ Lg</div>` : ''}
+      <div class="rashi-hdr">
+        <span class="rashi-name-lbl">${RASHI_NAMES_SA[rashiIdx]}</span>
+        <span class="rashi-num-lbl">${rashiNum}</span>
+      </div>
+      <div class="graha-tags">${planetsHTML}</div>
+    </div>`;
+  };
+
+  // Center info
+  const moonG    = grahas[1];
+  const moonNk   = getNakshatraV(moonG.lon);
+  const sunG     = grahas[0];
+
+  const gridHTML = SI_GRID_RASHIS.map((rn, i) => {
+    if (rn === 0 && SI_GRID_CSS[i][0] === 0) {
+      // Skip duplicate center markers; insert once
+      if (i === 5) return `
+        <div class="si-center" style="grid-column:2/4;grid-row:2/4;">
+          <div class="si-center-title">吠陀星盘</div>
+          <div class="si-center-info">
+            命宫 ${RASHI_NAMES_SA[lagnaRashi]}<br>
+            太阳 ${RASHI_SYM_W[sunG.rashiIdx]}${RASHI_NAMES_SA[sunG.rashiIdx]}<br>
+            月亮 ${RASHI_SYM_W[moonG.rashiIdx]}${RASHI_NAMES_SA[moonG.rashiIdx]}<br>
+            月宿 ${moonNk.name}<br>
+            差值 ${ayan.toFixed(3)}°
+          </div>
+        </div>`;
+      return '';
+    }
+    return buildCell(i);
+  }).join('');
+
+  // Planet details table
+  let ptbl = `<div class="vedic-sub-h">九曜位置</div>
+    <table class="vedic-table"><thead><tr>
+      <th>曜</th><th>黄道度数</th><th>星座</th><th>月宿 / 足</th><th>品质</th>
+    </tr></thead><tbody>`;
+  grahas.forEach((g, gi) => {
+    const nk      = getNakshatraV(g.lon);
+    const degInR  = (g.lon % 30).toFixed(1);
+    const dCol    = DCOL[g.dignity];
+    const dLabel  = {exalted:'入旺',debilitated:'入弱',own:'守界',moolatrikona:'精华',neutral:'平'}[g.dignity];
+    ptbl += `<tr>
+      <td><span style="color:${g.col};font-family:serif;font-size:0.95rem">${g.sym}</span> <span style="font-size:0.78rem">${g.name_zh}</span></td>
+      <td style="font-size:0.75rem;color:var(--fade)">${RASHI_SYM_W[g.rashiIdx]}${degInR}°</td>
+      <td>${RASHI_NAMES_SA[g.rashiIdx]}</td>
+      <td>${nk.name} <span style="color:var(--fade)">p${nk.pada}</span></td>
+      <td><span style="color:${dCol};font-weight:600;font-size:0.75rem">${dLabel}</span></td>
+    </tr>`;
+  });
+  ptbl += `</tbody></table>`;
+
+  // Vimshottari Dasha
+  const dashas   = calcVimshottariDasha(moonG.lon, year, month, day);
+  const nowMs    = Date.now();
+  const totalMs  = dashas.reduce((s,d)=>s+(d.endMs-d.startMs),0);
+
+  let dtbl = `<div class="vedic-sub-h">维姆什塔利大运（Vimshottari Dasha）</div>
+    <table class="vedic-table"><thead><tr>
+      <th>大运星</th><th>年限</th><th>开始</th><th>结束</th><th>进度</th>
+    </tr></thead><tbody>`;
+
+  dashas.forEach(d => {
+    const isActive = nowMs >= d.startMs && nowMs < d.endMs;
+    const dspan    = d.endMs - d.startMs;
+    const elapsed  = Math.max(0, Math.min(1, (nowMs - d.startMs) / dspan));
+    const pct      = (elapsed * 100).toFixed(0);
+    const grIdx    = DASHA_LORDS_V.indexOf(d.sym);
+    const gColor   = grIdx >= 0 ? GRAHA_V[grIdx][3] : '#c9942a';
+    dtbl += `<tr class="${isActive?'dasha-row-active':''}">
+      <td><span style="color:${gColor};font-family:serif">${d.sym}</span> <span style="font-size:0.78rem">${d.lord}</span>${isActive?'<span style="color:#c9942a;font-size:0.65rem;margin-left:4px">▶ 当前</span>':''}</td>
+      <td style="font-size:0.78rem">${d.years.toFixed(1)}年${d.partial?' *':''}</td>
+      <td style="font-size:0.72rem;color:var(--fade)">${fmtDate(d.startMs)}</td>
+      <td style="font-size:0.72rem;color:var(--fade)">${fmtDate(d.endMs)}</td>
+      <td><div class="dasha-bar-bg"><div class="dasha-bar-fg" style="width:${isActive?pct:'0'}%"></div></div></td>
+    </tr>`;
+  });
+  dtbl += `</tbody></table><div style="font-size:0.68rem;color:var(--fade);margin-top:6px">* 出生时已进行中的大运。各大运可细分为小运（Bhukti / Antardasha）。</div>`;
+
+  // Dignity legend
+  const dlegend = `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:0.72rem;">
+    <span><span class="dignity-dot" style="background:#d4a020"></span>入旺(Uchcha)</span>
+    <span><span class="dignity-dot" style="background:#44bb66"></span>精华(Moolatrikona)</span>
+    <span><span class="dignity-dot" style="background:#5599ee"></span>守界(Swarashi)</span>
+    <span><span class="dignity-dot" style="background:#dd5555"></span>入弱(Neecha)</span>
+    <span><span class="dignity-dot" style="background:#7a6040"></span>平</span>
+  </div>`;
+
+  // Info cards
+  const lagnaSignCN = ['白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手','摩羯','水瓶','双鱼'];
+  const infoCards = `<div class="info-grid" style="margin-top:20px">
+    <div class="info-card"><h4>命宫 (Lagna)</h4><div class="val">${RASHI_SYM_W[lagnaRashi]} ${RASHI_NAMES_SA[lagnaRashi]}</div><div class="sub">${lagnaSignCN[lagnaRashi]} ${(lagnaLon%30).toFixed(1)}°</div></div>
+    <div class="info-card"><h4>太阳星座 (Rashi)</h4><div class="val">${RASHI_SYM_W[sunG.rashiIdx]} ${RASHI_NAMES_SA[sunG.rashiIdx]}</div><div class="sub">${(sunG.lon%30).toFixed(1)}° <span style="color:${DCOL[sunG.dignity]}">${{exalted:'入旺',debilitated:'入弱',own:'守界',moolatrikona:'精华',neutral:''}[sunG.dignity]}</span></div></div>
+    <div class="info-card"><h4>月亮星座 (Chandra)</h4><div class="val">${RASHI_SYM_W[moonG.rashiIdx]} ${RASHI_NAMES_SA[moonG.rashiIdx]}</div><div class="sub">${moonNk.name} 第${moonNk.pada}足</div></div>
+    <div class="info-card"><h4>月宿主星</h4><div class="val">${DASHA_LORDS_ZH[moonNk.lordIdx]}</div><div class="sub">当前大运起算星</div></div>
+  </div>`;
+
+  const summary = buildSummaryCard('吠陀摘要卡',[
+    {k:'命宫：',v:`${RASHI_SYM_W[lagnaRashi]} ${RASHI_NAMES_SA[lagnaRashi]} ${(lagnaLon%30).toFixed(1)}°`},
+    {k:'月宿：',v:`${moonNk.name} p${moonNk.pada}`},
+    {k:'起运主星：',v:`${DASHA_LORDS_ZH[moonNk.lordIdx]}`},
+    {k:'Ayanamsha：',v:`${ayan.toFixed(3)}°`}
+  ]);
+  const activeDasha = dashas.find(d => nowMs >= d.startMs && nowMs < d.endMs);
+  const detailHTML=`<div class="ayan-note">拉西里亚扬萨差值 ${ayan.toFixed(3)}° · 分宫制：南印度整宫 · 九曜: 7行星 + 罗睺/计都</div><div class="vedic-wrap"><div class="vedic-top"><div class="vedic-chart-box"><div class="h-scroll"><div class="si-grid">${gridHTML}</div></div>${dlegend}</div><div class="vedic-sidebar">${ptbl}</div></div>${infoCards}${dtbl}</div>`;
+  const readHTML=`<div class="info-grid"><div class="info-card"><h4>命宫主轴</h4><div class="val">${RASHI_SYM_W[lagnaRashi]} ${RASHI_NAMES_SA[lagnaRashi]}</div><div class="sub">拉格纳体现人生推进方式</div></div><div class="info-card"><h4>月宿导向</h4><div class="val">${moonNk.name} 第${moonNk.pada}足</div><div class="sub">情绪与业力主题由月宿主导</div></div><div class="info-card"><h4>当前大运</h4><div class="val">${activeDasha?activeDasha.lord:'未落入当前区间'}</div><div class="sub">结合大运与分运判断阶段重点</div></div></div>`;
+  return `<div class="section-heading">${ZHEN('吠陀星盘 · 梵文占星','Vedic Jyotish')}</div>${summary}${buildAIFold(aiPrompt,'vedic')}${buildCollapsible(L('foldDetail'),detailHTML,true)}${buildCollapsible(L('foldBasic'),readHTML,false)}`;
+}
+
+function renderSynthesis(aiPrompt){
+  const summary=buildSummaryCard(ZHEN('综合解盘摘要','Integrated Reading Summary'),[
+    {k:ZHEN('说明：','Note:'),v:ZHEN('整合八字、紫薇、西洋、吠陀四体系。','Combines BaZi, ZiWei, Western, and Vedic.')},
+    {k:ZHEN('用途：','Use:'),v:ZHEN('用于跨体系共识与分歧的对照。','Cross-check agreements and divergences.')}
+  ]);
+  return `<div class="section-heading">${ZHEN('综合解盘','Integrated Reading')}</div>${summary}${buildAIFold(aiPrompt,'synthesis')}`;
+}
+
+// ===== Main =====
+let activeTabIndex = 0;
+let renderPayload = null;
+const STORAGE_KEY = 'xuanxue_state_v2';
+const FORM_FIELD_IDS = ['year','month','day','hour','gender','localHour','utcOffset','dst','lat','lon'];
+function getTabIndexFromUrl(){
+  const url=new URL(window.location.href);
+  const q=url.searchParams.get('tab');
+  const hash=window.location.hash.replace(/^#/,'');
+  const key=(q || (hash.startsWith('tab=') ? hash.slice(4) : hash) || '').toLowerCase();
+  const idx=TAB_KEYS.indexOf(key);
+  return idx>=0?idx:null;
+}
+function updateUrlForTab(i){
+  const key=TAB_KEYS[i]||TAB_KEYS[0];
+  const base=`${window.location.pathname}${window.location.search}`;
+  history.replaceState(null,'',`${base}#tab=${key}`);
+}
+
+function printActiveTab(){
+  window.print();
+}
+function toggleLanguage(){
+  uiLang=uiLang==='zh'?'en':'zh';
+  applyI18nToStatic();
+  saveState();
+  calculate();
+}
+function resetSavedState(){
+  localStorage.removeItem(STORAGE_KEY);
+  activeTabIndex=0;
+  uiLang='zh';
+  const defaults={year:'1990',month:'5',day:'15',hour:'0',gender:'m',localHour:'12.0',utcOffset:String(-new Date().getTimezoneOffset()/60),dst:false,lat:'39.9',lon:'116.4'};
+  Object.entries(defaults).forEach(([id,val])=>{ writeFieldValue(id,val); });
+  applyI18nToStatic();
+  setNotice(L('noticeStateReset'), false);
+  calculate();
+}
+function getScopeByPromptId(id){
+  return String(id||'').replace(/^aiPrompt_/,'');
+}
+function getBasePromptById(id){
+  const scope=getScopeByPromptId(id);
+  return renderPayload?.aiPrompts?.[scope] || '';
+}
+function presetInstruction(preset){
+  if(preset==='career') return uiLang==='en' ? 'Additional focus: prioritize career strategy, decision timing, skill leverage, and 90-day execution plan. Keep relationship/health concise.' : '附加聚焦：重点分析事业战略、关键决策时机、能力杠杆与90天执行计划；感情与健康简述即可。';
+  if(preset==='relationship') return uiLang==='en' ? 'Additional focus: prioritize relationship patterns, communication friction, emotional boundaries, and practical improvement actions.' : '附加聚焦：重点分析亲密关系模式、沟通摩擦点、情绪边界与可执行改善动作。';
+  if(preset==='health') return uiLang==='en' ? 'Additional focus: prioritize lifestyle rhythm, sleep/energy management, stress triggers, and weekly routine recommendations (non-medical).' : '附加聚焦：重点分析作息节律、睡眠与精力管理、压力触发点，并给出每周可执行习惯建议（非医疗建议）。';
+  return '';
+}
+function applyAIPresetById(id,preset){
+  const box=document.getElementById(id);
+  if(!box){ setNotice(L('noticeNoPrompt'), true); return; }
+  const base=getBasePromptById(id) || box.value;
+  if(!base){ setNotice(L('noticeNoPrompt'), true); return; }
+  if(preset==='base') { box.value=base; setNotice(L('noticePresetApplied'), false); return; }
+  const extra=presetInstruction(preset);
+  box.value=`${base}\n\n【追加偏好】\n${extra}`;
+  setNotice(L('noticePresetApplied'), false);
+}
+async function copyAIPromptById(id){
+  const box=document.getElementById(id);
+  if(!box||!box.value){ setNotice(L('noticeNoPrompt'), true); return; }
+  try {
+    await navigator.clipboard.writeText(box.value);
+    setNotice(L('noticeCopied'), false);
+  } catch(_e) {
+    box.select();
+    document.execCommand('copy');
+    setNotice(L('noticeCopied'), false);
+  }
+}
+function openChatGPTForReadingById(id){
+  const box=document.getElementById(id);
+  if(!box||!box.value){ setNotice(L('noticeNoPrompt'), true); return; }
+  const url=`https://chatgpt.com/?q=${encodeURIComponent(box.value)}`;
+  window.open(url,'_blank','noopener,noreferrer');
+  setNotice(L('noticeOpen'), false);
+}
+
+function readFieldValue(id){
+  const el=document.getElementById(id);
+  if(!el) return null;
+  return el.type==='checkbox' ? !!el.checked : el.value;
+}
+
+function writeFieldValue(id,value){
+  const el=document.getElementById(id);
+  if(!el||value===undefined||value===null) return;
+  if(el.type==='checkbox') el.checked=!!value;
+  else el.value=String(value);
+}
+
+function saveState(){
+  try {
+    const state={ activeTabIndex, uiLang, fields:{} };
+    FORM_FIELD_IDS.forEach((id)=>{ state.fields[id]=readFieldValue(id); });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(_e) {}
+}
+
+function restoreState(){
+  try {
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const state=JSON.parse(raw);
+    if(state && state.fields){
+      FORM_FIELD_IDS.forEach((id)=>{ writeFieldValue(id,state.fields[id]); });
+    }
+    if(state && Number.isInteger(state.activeTabIndex)) {
+      activeTabIndex=Math.max(0,Math.min(4,state.activeTabIndex));
+    }
+    if(state && (state.uiLang==='zh' || state.uiLang==='en')) uiLang=state.uiLang;
+    return true;
+  } catch(_e) {
+    return false;
+  }
+}
+
+function bindFormPersistence(){
+  FORM_FIELD_IDS.forEach((id)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('change', saveState);
+    if(el.type!=='checkbox' && el.tagName!=='SELECT') el.addEventListener('input', saveState);
+  });
+}
+
+function renderOutputShell(){
+  const output=document.getElementById('output');
+  output.innerHTML=`
+    <div id="calcMetaMount"></div>
+    <div class="tabs-row">
+      <div class="tabs" role="tablist" aria-label="命盘类型切换">
+        <div id="tab-0" class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="panel-0" onclick="switchTab(0)" onkeydown="onTabKeydown(event,0)">${L('tabBazi')}</div>
+        <div id="tab-1" class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-1" onclick="switchTab(1)" onkeydown="onTabKeydown(event,1)">${L('tabZiwei')}</div>
+        <div id="tab-2" class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-2" onclick="switchTab(2)" onkeydown="onTabKeydown(event,2)">${L('tabWestern')}</div>
+        <div id="tab-3" class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-3" onclick="switchTab(3)" onkeydown="onTabKeydown(event,3)">${L('tabVedic')}</div>
+        <div id="tab-4" class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-4" onclick="switchTab(4)" onkeydown="onTabKeydown(event,4)">${L('tabSynthesis')}</div>
+      </div>
+      <div class="action-row">
+        <button class="btn-lite" type="button" onclick="printActiveTab()">${L('printTab')}</button>
+      </div>
+    </div>
+    <div id="panel-0" class="result active" role="tabpanel" aria-labelledby="tab-0"></div>
+    <div id="panel-1" class="result" role="tabpanel" aria-labelledby="tab-1" hidden></div>
+    <div id="panel-2" class="result" role="tabpanel" aria-labelledby="tab-2" hidden></div>
+    <div id="panel-3" class="result" role="tabpanel" aria-labelledby="tab-3" hidden></div>
+    <div id="panel-4" class="result" role="tabpanel" aria-labelledby="tab-4" hidden></div>`;
+}
+
+function renderTabContent(i){
+  if(!renderPayload) return;
+  const panel=document.getElementById(`panel-${i}`);
+  if(!panel || panel.dataset.ready==='1') return;
+  if(i===0) panel.innerHTML=renderBaZi(renderPayload.bazi,renderPayload.year,renderPayload.gender,renderPayload.aiPrompts.bazi);
+  if(i===1) panel.innerHTML=renderZiWei(renderPayload.bazi,renderPayload.year,renderPayload.month,renderPayload.day,renderPayload.aiPrompts.ziwei);
+  if(i===2) panel.innerHTML=renderNatalChart(renderPayload.year,renderPayload.month,renderPayload.day,renderPayload.localHour,renderPayload.lat,renderPayload.lon,renderPayload.utcOffset,renderPayload.dstOn,renderPayload.aiPrompts.western);
+  if(i===3) panel.innerHTML=renderVedic(renderPayload.year,renderPayload.month,renderPayload.day,renderPayload.localHour,renderPayload.lat,renderPayload.lon,renderPayload.utcOffset,renderPayload.dstOn,renderPayload.aiPrompts.vedic);
+  if(i===4) panel.innerHTML=renderSynthesis(renderPayload.aiPrompts.synthesis);
+  panel.dataset.ready='1';
+}
+
+function onTabKeydown(e,i){
+  if(e.key==='ArrowRight'){ e.preventDefault(); const n=(i+1)%5; switchTab(n); document.getElementById(`tab-${n}`)?.focus(); }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); const n=(i+4)%5; switchTab(n); document.getElementById(`tab-${n}`)?.focus(); }
+  if(e.key==='Home'){ e.preventDefault(); switchTab(0); document.getElementById('tab-0')?.focus(); }
+  if(e.key==='End'){ e.preventDefault(); switchTab(4); document.getElementById('tab-4')?.focus(); }
+  if(e.key==='Enter' || e.key===' '){ e.preventDefault(); switchTab(i); }
+}
+
+function calculate(){
+  const tabToKeep = Math.max(0, Math.min(4, activeTabIndex));
+  const year=parseInt(document.getElementById('year').value,10);
+  const month=parseInt(document.getElementById('month').value,10);
+  const day=parseInt(document.getElementById('day').value,10);
+  const hour=parseInt(document.getElementById('hour').value,10);
+  const gender=document.getElementById('gender').value;
+  const localHour=parseFloat(document.getElementById('localHour').value)||12;
+  const utcOffset=parseFloat(document.getElementById('utcOffset').value);
+  const dstOn=document.getElementById('dst').checked;
+  const lat=parseFloat(document.getElementById('lat').value)||39.9;
+  const lon=parseFloat(document.getElementById('lon').value)||116.4;
+
+  if(!year||!month||!day||Number.isNaN(hour)){setNotice('请填写完整出生信息。', true);return;}
+  if(month<1||month>12){setNotice('月份范围应为 1-12。', true);return;}
+  if(day<1||day>31){setNotice('日期范围应为 1-31。', true);return;}
+  const dt=new Date(year,month-1,day);
+  if(dt.getFullYear()!==year||dt.getMonth()!==month-1||dt.getDate()!==day){setNotice('日期无效，请检查闰年与月末日期。', true);return;}
+  if(localHour<0||localHour>=24){setNotice('出生时刻(星盘)范围应为 0-23.99。', true);return;}
+  if(Number.isNaN(utcOffset)||utcOffset<-12||utcOffset>14){setNotice('UTC偏移范围应为 -12 到 +14。', true);return;}
+  if(lat<-90||lat>90){setNotice('纬度范围应为 -90 到 90。', true);return;}
+  if(lon<-180||lon>180){setNotice('经度范围应为 -180 到 180。', true);return;}
+
+  setNotice('计算完成。说明：紫薇农历日与部分天文项为近似模型，结果适合作为学习参考。', false);
+
+  const bazi=calcBaZi(year,month,day,hour);
+  const normUtc=normalizeUtcDate(year,month,day,localHour-(utcOffset+(dstOn?1:0)));
+  const metaHTML=buildCalcMeta({
+    inputDate:`${year}-${pad2(month)}-${pad2(day)}`,
+    localHour,
+    utcOffset,
+    dstOn,
+    utcText:utcLabel(normUtc),
+    lat,
+    lon
+  });
+  const aiPrompts=buildAIPrompts({ year,month,day,hour,gender,localHour,utcOffset,dstOn,lat,lon,bazi });
+  renderPayload={ year,month,day,hour,gender,localHour,utcOffset,dstOn,lat,lon,bazi,aiPrompts };
+  renderOutputShell();
+  const metaMount=document.getElementById('calcMetaMount');
+  if(metaMount) metaMount.innerHTML=metaHTML;
+  switchTab(tabToKeep);
+  saveState();
+}
+function switchTab(i){
+  activeTabIndex = i;
+  renderTabContent(i);
+  document.querySelectorAll('.tab').forEach((t,j)=>{ 
+    t.classList.toggle('active',i===j);
+    t.setAttribute('aria-selected', i===j ? 'true' : 'false');
+    t.setAttribute('tabindex', i===j ? '0' : '-1');
+  });
+  document.querySelectorAll('.result').forEach((r,j)=>{ 
+    r.classList.toggle('active',i===j);
+    r.hidden = i!==j;
+  });
+  updateUrlForTab(i);
+  saveState();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  bindFormPersistence();
+  const restored=restoreState();
+  applyI18nToStatic();
+  const tabFromUrl=getTabIndexFromUrl();
+  if(tabFromUrl!==null) activeTabIndex=tabFromUrl;
+  const tz = -new Date().getTimezoneOffset()/60;
+  const utcField = document.getElementById('utcOffset');
+  if (utcField && !restored) utcField.value = String(tz);
+  saveState();
+  calculate();
+  window.addEventListener('hashchange', function(){
+    const idx=getTabIndexFromUrl();
+    if(idx!==null && idx!==activeTabIndex) switchTab(idx);
+  });
+});
+</script>
+</body>
+</html>
