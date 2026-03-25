@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joey Vibe Apps</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', serif;
+    background: #0a0a0f;
+    color: #e8d5a3;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 2rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.5rem;
+    color: #d4a843;
+  }
+  p.subtitle {
+    font-size: 0.9rem;
+    color: #8a7a5a;
+    letter-spacing: 0.1em;
+    margin-bottom: 3rem;
+  }
+  .apps {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .app-card {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #3a3050;
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: #e8d5a3;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    min-width: 180px;
+  }
+  .app-card:hover {
+    transform: translateY(-4px);
+    border-color: #d4a843;
+    box-shadow: 0 8px 30px rgba(212, 168, 67, 0.2);
+  }
+  .app-card .icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .app-card .name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #d4a843;
+    margin-bottom: 0.3rem;
+  }
+  .app-card .desc {
+    font-size: 0.8rem;
+    color: #8a7a5a;
+  }
+</style>
+</head>
+<body>
+  <h1>Joey Vibe Apps</h1>
+  <p class="subtitle">Interactive Chinese Metaphysics Tools</p>
+  <div class="apps">
+    <a href="fengshui.html" class="app-card">
+      <div class="icon">☯</div>
+      <div class="name">風水羅盤</div>
+      <div class="desc">Feng Shui Compass</div>
+    </a>
+    <a href="xuanxue.html" class="app-card">
+      <div class="icon">✦</div>
+      <div class="name">玄學</div>
+      <div class="desc">Xuanxue</div>
+    </a>
+  </div>
+</body>
+</html>
