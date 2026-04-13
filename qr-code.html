@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#f5f3ff,#eff6ff,#eef2ff);min-height:100vh;padding:16px;color:#1f2937}
+.wrap{max-width:960px;margin:0 auto}
+.hero{text-align:center;margin-bottom:2rem}
+.hero-icon{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;margin-bottom:1rem;font-size:1.8rem;color:#fff;background:linear-gradient(135deg,#7c3aed,#2563eb)}
+h1{font-size:2.25rem;font-weight:700;margin-bottom:.25rem;background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subtitle{color:#6b7280}
+.card{background:#fff;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,.15);overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid #e5e7eb}
+.tab{flex:1;padding:1rem;font-size:.875rem;font-weight:500;color:#6b7280;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:inherit;transition:all .2s}
+.tab:hover{background:#f9fafb}
+.tab.active{color:#7c3aed;border-bottom-color:#7c3aed;background:#f5f3ff}
+.panel{padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+@media(max-width:720px){.panel{grid-template-columns:1fr}}
+.section-title{font-size:1.5rem;font-weight:600;color:#1f2937;margin-bottom:1rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.875rem;font-weight:500;color:#374151;margin-bottom:.25rem}
+.hint{font-size:.75rem;color:#9ca3af;margin-top:.25rem}
+.inp{width:100%;padding:.75rem 1rem;border:1px solid #d1d5db;border-radius:12px;font-size:.875rem;outline:none;font-family:inherit;transition:all .2s;background:#fff;color:#1f2937}
+.inp:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(196,181,253,.5)}
+textarea.inp{resize:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.stack>*+*{margin-top:.75rem}
+.hidden{display:none!important}
+.overlay-box{border:1px solid #e5e7eb;border-radius:16px;padding:1rem;margin-bottom:1rem}
+.overlay-title{font-size:.875rem;font-weight:600;color:#374151;margin-bottom:.75rem}
+.mode-row{display:flex;gap:.5rem;margin-bottom:.75rem}
+.mode-btn{flex:1;padding:.5rem;border-radius:12px;font-size:.875rem;font-weight:500;border:1px solid #e5e7eb;background:#fff;color:#4b5563;cursor:pointer;font-family:inherit;transition:all .2s}
+.mode-btn:hover{border-color:#c4b5fd}
+.mode-btn.active{color:#fff;border-color:#7c3aed;background:linear-gradient(135deg,#7c3aed,#2563eb)}
+.emoji-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
+.emoji-btn{width:36px;height:36px;border-radius:8px;font-size:1.25rem;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.emoji-btn:hover{background:#f3f4f6}
+.emoji-btn.active{background:#ede9fe;box-shadow:0 0 0 2px #8b5cf6}
+.upload-btn{width:100%;padding:.5rem;border:2px dashed #c4b5fd;border-radius:12px;font-size:.875rem;color:#7c3aed;font-weight:500;background:#fff;cursor:pointer;font-family:inherit;transition:all .2s}
+.upload-btn:hover{background:#faf5ff}
+.preview-row{display:flex;align-items:center;gap:.5rem;margin-top:.5rem}
+.preview-img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #c4b5fd}
+.preview-x{margin-left:auto;background:none;border:none;color:#9ca3af;font-size:1.125rem;cursor:pointer}
+.preview-x:hover{color:#ef4444}
+.clear-btn{width:100%;padding:.75rem;background:#f3f4f6;color:#374151;border:none;border-radius:12px;font-size:.875rem;font-weight:500;cursor:pointer;font-family:inherit;transition:background .2s}
+.clear-btn:hover{background:#e5e7eb}
+.right{display:flex;flex-direction:column;align-items:center;gap:1rem}
+.qr-box{background:#f9fafb;border-radius:16px;padding:2rem;width:100%;max-width:320px;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.empty{text-align:center}
+.empty-icon{font-size:3.75rem;opacity:.2;margin-bottom:.5rem}
+.empty-text{color:#9ca3af;font-size:.875rem}
+canvas.qr{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.scan-hint{font-size:.75rem;color:#6b7280;margin-top:.75rem}
+.actions{display:flex;gap:.75rem;width:100%;max-width:320px}
+.btn-primary{flex:1;padding:.75rem;color:#fff;border:none;border-radius:12px;font-size:.875rem;font-weight:500;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#7c3aed,#2563eb);transition:opacity .2s}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{flex:1;padding:.75rem;border:none;border-radius:12px;font-size:.875rem;font-weight:500;cursor:pointer;font-family:inherit;background:#f3f4f6;color:#374151;transition:all .2s}
+.btn-secondary:hover{background:#e5e7eb}
+.btn-secondary.copied{background:#d1fae5;color:#047857}
+.data-box{width:100%;max-width:320px}
+.data-label{font-size:.75rem;color:#6b7280;margin-bottom:.25rem}
+.data-pre{background:#f3f4f6;border-radius:12px;padding:.75rem;font-size:.75rem;color:#4b5563;max-height:96px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.footer{text-align:center;margin-top:1.5rem;color:#9ca3af;font-size:.75rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-icon">▣</div>
+    <h1>QR Code Generator</h1>
+    <p class="subtitle">Generate QR codes for URLs, text, and contacts</p>
+  </div>
+
+  <div class="card">
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="url">🔗 URL</button>
+      <button class="tab" data-tab="text">💬 Text</button>
+      <button class="tab" data-tab="contact">👤 Contact</button>
+    </div>
+
+    <div class="panel">
+      <div>
+        <p class="section-title" id="sectionTitle">Enter URL</p>
+
+        <div id="pane-url" class="pane">
+          <div class="field">
+            <label for="url">Website URL</label>
+            <input class="inp" id="url" placeholder="example.com or https://example.com" />
+            <p class="hint">https:// added automatically if omitted.</p>
+          </div>
+        </div>
+
+        <div id="pane-text" class="pane hidden">
+          <div class="field">
+            <label for="text">Text Content</label>
+            <textarea class="inp" id="text" rows="4" placeholder="Enter any text..."></textarea>
+          </div>
+        </div>
+
+        <div id="pane-contact" class="pane hidden">
+          <div class="stack">
+            <div class="grid2">
+              <div><label for="c-first">First Name</label><input class="inp" id="c-first" placeholder="John" /></div>
+              <div><label for="c-last">Last Name</label><input class="inp" id="c-last" placeholder="Doe" /></div>
+            </div>
+            <div><label for="c-phone">Phone</label><input class="inp" id="c-phone" type="tel" placeholder="+1 (555) 123-4567" /></div>
+            <div><label for="c-email">Email</label><input class="inp" id="c-email" type="email" placeholder="john@example.com" /></div>
+            <div><label for="c-org">Organization</label><input class="inp" id="c-org" placeholder="Company" /></div>
+            <div><label for="c-website">Website</label><input class="inp" id="c-website" placeholder="https://example.com" /></div>
+          </div>
+        </div>
+
+        <div class="overlay-box">
+          <p class="overlay-title">Center overlay</p>
+          <div class="mode-row" id="modeRow">
+            <button class="mode-btn active" data-mode="none">None</button>
+            <button class="mode-btn" data-mode="emoji">😊 Emoji</button>
+            <button class="mode-btn" data-mode="image">📷 Photo</button>
+          </div>
+          <div id="emojiPicker" class="hidden">
+            <div class="emoji-row" id="emojiRow"></div>
+            <p class="hint">Selected: <span id="emojiSelected" style="font-size:1rem">⭐</span></p>
+          </div>
+          <div id="imagePicker" class="hidden">
+            <button class="upload-btn" id="uploadBtn">Upload photo</button>
+            <input type="file" id="fileInput" accept="image/*" class="hidden" />
+            <div id="previewRow" class="preview-row hidden">
+              <img id="previewImg" class="preview-img" alt="preview" />
+              <span class="hint" style="margin:0">Photo uploaded</span>
+              <button class="preview-x" id="removeImg" aria-label="Remove photo">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="clear-btn" id="clearBtn">Clear All Fields</button>
+      </div>
+
+      <div class="right">
+        <p class="section-title">Generated QR Code</p>
+        <div class="qr-box">
+          <div id="emptyState" class="empty">
+            <div class="empty-icon">▣</div>
+            <p class="empty-text">Fill in the form to generate your QR code</p>
+          </div>
+          <canvas id="qrCanvas" class="qr hidden"></canvas>
+          <p id="scanHint" class="scan-hint hidden">Scan with your device</p>
+        </div>
+        <div id="actions" class="actions hidden">
+          <button class="btn-primary" id="downloadBtn">⬇ Download</button>
+          <button class="btn-secondary" id="copyBtn">📋 Copy Data</button>
+        </div>
+        <div id="dataBox" class="data-box hidden">
+          <p class="data-label">QR Data:</p>
+          <pre class="data-pre" id="dataPre"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="footer">Generate QR codes instantly • No data stored • Free to use</p>
+</div>
+
+<script>
+const EMOJIS = ["😊","🔥","⭐","💎","🚀","❤️","🎯","🌟","👋","🦁","🐉","🍀","💡","🎵","📌"];
+const state = {
+  tab: "url",
+  mode: "none",
+  emoji: "⭐",
+  imgSrc: null,
+};
+
+function loadQRious(cb) {
+  if (window.QRious) return cb();
+  const s = document.createElement("script");
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js";
+  s.onload = cb;
+  s.onerror = () => alert("Failed to load QR library. Check your connection.");
+  document.head.appendChild(s);
+}
+
+function val(id) { return document.getElementById(id).value; }
+function el(id) { return document.getElementById(id); }
+
+function getData() {
+  if (state.tab === "url") {
+    const v = val("url").trim();
+    if (!v) return "";
+    return v.startsWith("http") ? v : "https://" + v;
+  }
+  if (state.tab === "text") return val("text");
+  const first = val("c-first"), last = val("c-last");
+  const phone = val("c-phone"), email = val("c-email");
+  const org = val("c-org"), website = val("c-website");
+  if (!first && !last && !phone && !email) return "";
+  return `BEGIN:VCARD\nVERSION:3.0\nFN:${first} ${last}\nN:${last};${first};;;\nORG:${org}\nTEL:${phone}\nEMAIL:${email}\nURL:${website}\nEND:VCARD`;
+}
+
+function drawOverlay(canvas) {
+  if (state.mode === "none") return;
+  const ctx = canvas.getContext("2d");
+  const s = canvas.width, cx = s/2, cy = s/2, r = s*0.11;
+  ctx.beginPath(); ctx.arc(cx, cy, r+5, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill();
+  if (state.mode === "emoji") {
+    ctx.font = `${r*1.4}px serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(state.emoji, cx, cy+2);
+  } else if (state.mode === "image" && state.imgSrc) {
+    const img = new Image();
+    img.onload = () => {
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
+      ctx.drawImage(img, cx-r, cy-r, r*2, r*2);
+      ctx.restore();
+    };
+    img.src = state.imgSrc;
+  }
+}
+
+function render() {
+  const data = getData();
+  const canvas = el("qrCanvas");
+  const empty = el("emptyState");
+  const scanHint = el("scanHint");
+  const actions = el("actions");
+  const dataBox = el("dataBox");
+
+  if (!data) {
+    canvas.classList.add("hidden");
+    scanHint.classList.add("hidden");
+    actions.classList.add("hidden");
+    dataBox.classList.add("hidden");
+    empty.classList.remove("hidden");
+    return;
+  }
+
+  empty.classList.add("hidden");
+  canvas.classList.remove("hidden");
+  scanHint.classList.remove("hidden");
+  actions.classList.remove("hidden");
+  dataBox.classList.remove("hidden");
+  el("dataPre").textContent = data;
+
+  loadQRious(() => {
+    new window.QRious({
+      element: canvas,
+      value: data,
+      size: 280,
+      background: "white",
+      foreground: "black",
+      level: "H",
+    });
+    drawOverlay(canvas);
+  });
+}
+
+// Tabs
+document.querySelectorAll(".tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.tab = btn.dataset.tab;
+    document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".pane").forEach(p => p.classList.add("hidden"));
+    el("pane-" + state.tab).classList.remove("hidden");
+    el("sectionTitle").textContent =
+      state.tab === "url" ? "Enter URL" :
+      state.tab === "text" ? "Enter Text" : "Contact Information";
+    render();
+  });
+});
+
+// Input bindings
+["url","text","c-first","c-last","c-phone","c-email","c-org","c-website"].forEach(id => {
+  el(id).addEventListener("input", render);
+});
+
+// Mode buttons
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.mode = btn.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b === btn));
+    el("emojiPicker").classList.toggle("hidden", state.mode !== "emoji");
+    el("imagePicker").classList.toggle("hidden", state.mode !== "image");
+    render();
+  });
+});
+
+// Emoji picker
+const emojiRow = el("emojiRow");
+EMOJIS.forEach(e => {
+  const b = document.createElement("button");
+  b.className = "emoji-btn" + (e === state.emoji ? " active" : "");
+  b.textContent = e;
+  b.addEventListener("click", () => {
+    state.emoji = e;
+    el("emojiSelected").textContent = e;
+    emojiRow.querySelectorAll(".emoji-btn").forEach(btn => btn.classList.toggle("active", btn === b));
+    render();
+  });
+  emojiRow.appendChild(b);
+});
+
+// Image upload
+el("uploadBtn").addEventListener("click", () => el("fileInput").click());
+el("fileInput").addEventListener("change", ev => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    state.imgSrc = e.target.result;
+    el("previewImg").src = state.imgSrc;
+    el("previewRow").classList.remove("hidden");
+    el("uploadBtn").textContent = "Change photo";
+    render();
+  };
+  r.readAsDataURL(file);
+});
+el("removeImg").addEventListener("click", () => {
+  state.imgSrc = null;
+  el("previewRow").classList.add("hidden");
+  el("uploadBtn").textContent = "Upload photo";
+  el("fileInput").value = "";
+  render();
+});
+
+// Clear
+el("clearBtn").addEventListener("click", () => {
+  ["url","text","c-first","c-last","c-phone","c-email","c-org","c-website"].forEach(id => el(id).value = "");
+  state.imgSrc = null;
+  el("previewRow").classList.add("hidden");
+  el("uploadBtn").textContent = "Upload photo";
+  el("fileInput").value = "";
+  render();
+});
+
+// Download
+el("downloadBtn").addEventListener("click", () => {
+  const canvas = el("qrCanvas");
+  const a = document.createElement("a");
+  a.download = "qr-code.png";
+  a.href = canvas.toDataURL();
+  a.click();
+});
+
+// Copy
+el("copyBtn").addEventListener("click", () => {
+  const data = getData();
+  if (!data) return;
+  navigator.clipboard.writeText(data).then(() => {
+    const btn = el("copyBtn");
+    btn.textContent = "✓ Copied!";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = "📋 Copy Data";
+      btn.classList.remove("copied");
+    }, 2000);
+  });
+});
+
+render();
+</script>
+</body>
+</html>
