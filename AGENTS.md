@@ -7,6 +7,7 @@ This directory contains standalone single-page HTML apps. Treat this file as the
 - Primary apps in scope:
   - `fengshui.html`
   - `xuanxue.html`
+  - `laohuangli.html`
 - Ignore anything under `tmp/` unless explicitly requested.
 
 ## Core Constraint
@@ -44,6 +45,17 @@ This directory contains standalone single-page HTML apps. Treat this file as the
   - Clear precision disclaimers and configurable calculation modes.
   - Profile persistence and export/print capabilities.
   - Performance tuning for large render blocks.
+
+### `laohuangli.html`
+
+- Features: traditional Chinese almanac (老黄历) with monthly calendar grid, lunar date conversion, Gan-Zhi (天干地支) day/month/year pillars, 24 solar terms, zodiac, Wu Xing, and daily Yi/Ji (宜忌) recommendations.
+- Key risks:
+  - Algorithmic correctness (lunar calendar computation relies on Meeus-based astronomical engine for new moons and solar longitude).
+  - Yi/Ji generation uses a seeded pseudo-random selection rather than a canonical almanac source.
+- Preferred enhancements:
+  - Date deep-linking via URL params or `localStorage` persistence.
+  - Print/export for a selected date or month.
+  - Accessibility and screen-reader support for the calendar grid.
 
 ## Quality Bar
 
