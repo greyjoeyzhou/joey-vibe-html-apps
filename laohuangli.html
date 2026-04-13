@@ -89,255 +89,76 @@ body{background:var(--dark);color:var(--paper);font-family:'Noto Serif SC',serif
   <div class="det" id="detpanel"><div class="sel-hint">点击任意日期查看详细老黄历 ↑</div></div>
 </div>
 
-<script>
-// ════════════════════════════════════════════════════════
-// ASTRONOMICAL ENGINE  (Jean Meeus simplified)
-// ════════════════════════════════════════════════════════
-const CST=8/24; // UTC+8
+<script type="module">
+const TYME_SOURCES=[
+  'https://esm.sh/tyme4ts@1.4.6',
+  './vendor/tyme4ts.mjs'
+];
 
-function toJD(y,m,d){
-  if(m<=2){y--;m+=12}
-  const A=Math.floor(y/100),B=2-A+Math.floor(A/4);
-  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;
-}
-function fromJD(j){
-  j+=0.5;const z=Math.floor(j);
-  const alpha=Math.floor((z-1867216.25)/36524.25);
-  const a=z>=2299161?z+1+alpha-Math.floor(alpha/4):z;
-  const b=a+1524,c=Math.floor((b-122.1)/365.25);
-  const d2=Math.floor(365.25*c),e=Math.floor((b-d2)/30.6001);
-  const day=b-d2-Math.floor(30.6001*e);
-  const mon=e<14?e-1:e-13;
-  return{y:mon>2?c-4716:c-4715,m:mon,d:day};
-}
-function JDN(y,m,d){return Math.floor(toJD(y,m,d)+0.5);}
-
-// New moon JDE (Meeus ch.49)
-function newMoonJDE(k){
-  const T=k/1236.85;
-  let J=2451550.09765+29.530588853*k+0.0001337*T*T-0.00000015*T*T*T;
-  const E=1-0.002516*T-0.0000074*T*T;
-  const M =((2.5534+29.10535669*k)%360)*Math.PI/180;
-  const Mp=((201.5643+385.81693528*k)%360)*Math.PI/180;
-  const F =((160.7108+390.67050274*k)%360)*Math.PI/180;
-  const Om=((124.7746-1.56375580*k)%360)*Math.PI/180;
-  J+=-0.40720*Math.sin(Mp)+0.17241*E*Math.sin(M)+0.01608*Math.sin(2*Mp)
-    +0.01039*Math.sin(2*F)+0.00739*E*Math.sin(Mp-M)-0.00514*E*Math.sin(Mp+M)
-    +0.00208*E*E*Math.sin(2*M)-0.00111*Math.sin(Mp-2*F)-0.00057*Math.sin(Mp+2*F)
-    +0.00056*E*Math.sin(2*Mp+M)-0.00042*Math.sin(3*Mp)+0.00042*E*Math.sin(M+2*F)
-    +0.00038*E*Math.sin(M-2*F)-0.00024*E*Math.sin(2*Mp-M)-0.00017*Math.sin(Om);
-  return J;
-}
-
-// Sun longitude (degrees)
-function sunLng(jde){
-  const T=(jde-2451545)/36525;
-  const L0=280.46646+36000.76983*T;
-  const M=((357.52911+35999.05029*T)%360)*Math.PI/180;
-  const C=(1.914602-0.004817*T)*Math.sin(M)+(0.019993-0.000101*T)*Math.sin(2*M)+0.000289*Math.sin(3*M);
-  return((L0+C)%360+360)%360;
-}
-
-// Find JDE when sun hits target longitude
-function sunReach(lng,est){
-  let j=est;
-  for(let i=0;i<50;i++){
-    let d=lng-sunLng(j);
-    if(d>180)d-=360;if(d<-180)d+=360;
-    const s=d/360*365.25;j+=s;
-    if(Math.abs(s)<0.00005)break;
+async function loadTyme(){
+  const errors=[];
+  for(const src of TYME_SOURCES){
+    try{
+      return await import(src);
+    }catch(error){
+      errors.push(`${src}: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
-  return j;
+  throw new Error(`Tyme load failed. Tried: ${errors.join(' | ')}`);
 }
 
-// ── New moon cache ──
-const NM_CACHE={};
-function nmCST(k){
-  if(NM_CACHE[k]!==undefined)return NM_CACHE[k];
-  const jde=newMoonJDE(k);
-  const g=fromJD(jde+CST);
-  return NM_CACHE[k]=JDN(g.y,g.m,g.d);
-}
-function kEst(y,m){return Math.round((y+(m-1)/12-2000)*12.3685);}
-function kForJDN(jdn){
-  let k=kEst(fromJD(jdn).y,fromJD(jdn).m);
-  while(nmCST(k)>jdn)k--;
-  while(nmCST(k+1)<=jdn)k++;
-  return k;
-}
+const { SolarDay, SolarTerm } = await loadTyme();
 
-// ── Zhongqi (中气) check ──
-const ZQ_CACHE={};
-function hasZhongqi(k){
-  if(ZQ_CACHE[k]!==undefined)return ZQ_CACHE[k];
-  const j0=newMoonJDE(k),j1=newMoonJDE(k+1);
-  const mid=(j0+j1)/2;
-  for(let lng=0;lng<360;lng+=30){
-    const t=sunReach(lng,mid);
-    if(t>=j0-0.01&&t<j1-0.01){ZQ_CACHE[k]={yes:true,lng};return ZQ_CACHE[k];}
-  }
-  return ZQ_CACHE[k]={yes:false};
-}
-
-// ── Winter solstice month start (k for month11) ──
-function wsMonthK(wsYear){
-  const wsJDE=sunReach(270,toJD(wsYear,12,1));
-  let k=Math.round((wsJDE-2451550.09765)/29.530588853);
-  while(newMoonJDE(k)>wsJDE+CST)k--;
-  while(newMoonJDE(k+1)<=wsJDE+CST)k++;
-  if(newMoonJDE(k)>wsJDE+CST)k--;
-  return k;
-}
-
-// ── Build month table for a Chinese year ──
-const MINFO={};
-function buildMonthsForWsYear(wy){
-  if(MINFO[wy])return;
-  const k11=wsMonthK(wy);
-  const k11n=wsMonthK(wy+1);
-  const total=k11n-k11;
-  const hasLeap=total>=13;
-  let mn=11,leapDone=false;
-  for(let i=0;i<=total;i++){
-    const k=k11+i;
-    const isLeap=hasLeap&&!leapDone&&!hasZhongqi(k).yes;
-    if(isLeap){leapDone=true;}
-    const cYear=(mn===11||mn===12)?wy:wy+1;
-    if(!MINFO[k])MINFO[k]={lunarYear:cYear,lunarMonth:mn,isLeap};
-    if(!isLeap){mn++;if(mn>12)mn=1;}
-    else{/* leap repeats mn, so don't increment */}
-  }
-}
-
-function getMonthInfo(k){
-  const jde=newMoonJDE(k);
-  const g=fromJD(jde+CST);
-  let wy=g.y;
-  if(g.m<3)wy--;  // likely previous ws year
-  // Try wy-1..wy+1
-  for(const w of[wy-1,wy,wy+1]){
-    buildMonthsForWsYear(w);
-    if(MINFO[k])return MINFO[k];
-  }
-  return{lunarYear:g.y,lunarMonth:1,isLeap:false};
-}
-
-// ════════════════════════════════════════════════════════
-// GANZHI  天干地支
-// ════════════════════════════════════════════════════════
-const TG=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-const DZ=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 const ZODIAC=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
 const ZODIAC_E=['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
-const WX=['木','木','火','火','土','土','金','金','水','水']; // by TG index
-const WX_EN=['Wood','Wood','Fire','Fire','Earth','Earth','Metal','Metal','Water','Water'];
-
-function yearGZ(lunarY){const n=((lunarY-4)%10+10)%10;const b=((lunarY-4)%12+12)%12;return TG[n]+DZ[b];}
-function yearZodiac(lunarY){return ZODIAC[((lunarY-4)%12+12)%12];}
-
-// Day GanZhi: reference JDN 2451604 = 甲子 (commonly cited)
-function dayGZ(jdn){
-  const n=((jdn-2451604)%60+60)%60;
-  return{gan:TG[n%10],zhi:DZ[n%12],n,full:TG[n%10]+DZ[n%12]};
-}
-
-// Month GanZhi: month pillar based on solar month
-function monthGZ(solarY,solarM){
-  // month TG = (year * 12 + month) cycle; offset so 1984/2 = 甲子月
-  const mn=(solarY-1984)*12+solarM+1;
-  const ti=((mn%10)+10)%10,di=((mn%12)+12)%12;
-  return TG[ti]+DZ[di];
-}
-
-// ════════════════════════════════════════════════════════
-// SOLAR TERMS  节气
-// ════════════════════════════════════════════════════════
-const JIEQI=[
-  {lng:315,name:'小寒'},{lng:330,name:'大寒'},{lng:345,name:'立春'},{lng:0,name:'雨水'},
-  {lng:15,name:'惊蛰'},{lng:30,name:'春分'},{lng:45,name:'清明'},{lng:60,name:'谷雨'},
-  {lng:75,name:'立夏'},{lng:90,name:'小满'},{lng:105,name:'芒种'},{lng:120,name:'夏至'},
-  {lng:135,name:'小暑'},{lng:150,name:'大暑'},{lng:165,name:'立秋'},{lng:180,name:'处暑'},
-  {lng:195,name:'白露'},{lng:210,name:'秋分'},{lng:225,name:'寒露'},{lng:240,name:'霜降'},
-  {lng:255,name:'立冬'},{lng:270,name:'小雪'},{lng:285,name:'大雪'},{lng:300,name:'冬至'}
-];
-const JQ_BY_LNG={};JIEQI.forEach(j=>JQ_BY_LNG[j.lng]=j.name);
 
 const JQ_DAY_CACHE={};
 function getMonthJieqi(y,m){
-  const key=`${y}-${m}`;if(JQ_DAY_CACHE[key])return JQ_DAY_CACHE[key];
+  const key=`${y}-${m}`;
+  if(JQ_DAY_CACHE[key])return JQ_DAY_CACHE[key];
   const map={};
-  const d1=toJD(y,m,1),d2=toJD(y,m,28)+5;
-  JIEQI.forEach(({lng,name})=>{
-    const t=sunReach(lng,(d1+d2)/2);
-    if(t>=d1&&t<d2+1){
-      const g=fromJD(t+CST);
-      if(g.m===m&&g.y===y)map[g.d]=name;
+  for(let i=0;i<24;i++){
+    const term=SolarTerm.fromIndex(y,i);
+    const solarDay=term.getSolarDay();
+    if(solarDay.getYear()===y&&solarDay.getMonth()===m){
+      map[solarDay.getDay()]=term.getName();
     }
-  });
+  }
   return JQ_DAY_CACHE[key]=map;
 }
-
-// ════════════════════════════════════════════════════════
-// YI / JI  宜忌  (traditional system based on day branch)
-// ════════════════════════════════════════════════════════
-const ALL_YI=['祈福','出行','嫁娶','开市','移徙','安床','解除','剃头','整手足甲',
-  '入学','纳采','裁衣','作梁','修造','破屋','动土','安葬','开渠','立券','交易',
-  '纳财','出货财','伐木','捕鱼','畋猎','取鱼','乘船','渡水','栽种','牧养'];
-const ALL_JI=['嫁娶','出行','开市','动土','安葬','破土','祈福','求嗣','行丧',
-  '修造','置产','安床','入宅','赴任','词讼','上梁','纳采','移徙','经络','栽种'];
-
-// Seed rng from day ganzhi index
-function seededSet(n,pool,count){
-  const arr=[...pool],out=[];
-  let s=n*31+7;
-  for(let i=0;i<count&&arr.length;i++){
-    s=(s*1664525+1013904223)&0xFFFFFFFF;
-    const idx=((s>>>0)%arr.length+arr.length)%arr.length;
-    out.push(arr.splice(idx,1)[0]);
-  }
-  return out;
-}
-function getYiJi(dgz){
-  const n=dgz.n;
-  const yi=seededSet(n*3,ALL_YI,5);
-  const ji=seededSet(n*7+13,ALL_JI,4);
-  return{yi,ji};
-}
-
-// ════════════════════════════════════════════════════════
-// CHONG SHA  冲煞
-// ════════════════════════════════════════════════════════
-const CHONG_ZHI={子:'午',丑:'未',寅:'申',卯:'酉',辰:'戌',巳:'亥',午:'子',未:'丑',申:'寅',酉:'卯',戌:'辰',亥:'巳'};
-const ZHI_ZODIAC={子:'鼠',丑:'牛',寅:'虎',卯:'兔',辰:'龙',巳:'蛇',午:'马',未:'羊',申:'猴',酉:'鸡',戌:'狗',亥:'猪'};
-function getChong(dgz){const cz=CHONG_ZHI[dgz.zhi];return`冲${ZHI_ZODIAC[cz]}(${cz})`;}
-
-// ════════════════════════════════════════════════════════
-// LUNAR DATE NAMES
-// ════════════════════════════════════════════════════════
-const DAYS_CN=['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
-  '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
-  '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
-const MONTHS_CN=['正','二','三','四','五','六','七','八','九','十','十一','十二'];
 const SOL_MONTHS=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 
 // ════════════════════════════════════════════════════════
 // MAIN: convert Gregorian → Chinese calendar info
 // ════════════════════════════════════════════════════════
 function toChineseCal(y,m,d){
-  const jdn=JDN(y,m,d);
-  const k=kForJDN(jdn);
-  const minfo=getMonthInfo(k);
-  const lunarDay=jdn-nmCST(k)+1;
-  const dgz=dayGZ(jdn);
-  const mgz=monthGZ(y,m);
-  const ygz=yearGZ(minfo.lunarYear);
+  const solar=SolarDay.fromYmd(y,m,d);
+  const lunar=solar.getLunarDay();
+  const lunarMonth=lunar.getLunarMonth();
+  const lunarYear=lunarMonth.getLunarYear();
+  const sixtyCycleDay=solar.getSixtyCycleDay();
+  const dayCycle=sixtyCycleDay.getSixtyCycle();
+  const dayStem=dayCycle.getHeavenStem();
+  const dayBranch=dayCycle.getEarthBranch();
+  const monthCycle=sixtyCycleDay.getMonth();
+  const yearCycle=lunarYear.getSixtyCycle();
+  const chongBranch=dayBranch.getOpposite();
+
   return{
-    lunarYear:minfo.lunarYear,lunarMonth:minfo.lunarMonth,lunarDay,isLeap:minfo.isLeap,
-    dayGZ:dgz,monthGZ:mgz,yearGZ:ygz,
-    zodiac:yearZodiac(minfo.lunarYear),
-    wuxing:WX[TG.indexOf(dgz.gan)]+'行',
-    chong:getChong(dgz),
-    ...getYiJi(dgz)
+    lunarYear:lunar.getYear(),
+    lunarMonth:lunar.getMonth(),
+    lunarDay:lunar.getDay(),
+    isLeap:lunarMonth.isLeap(),
+    lunarMonthName:lunarMonth.getName(),
+    lunarDayName:lunar.getName(),
+    dayGZ:{gan:dayStem.getName(),zhi:dayBranch.getName(),full:dayCycle.getName()},
+    monthGZ:monthCycle.getName(),
+    yearGZ:yearCycle.getName(),
+    zodiac:yearCycle.getEarthBranch().getZodiac().getName(),
+    wuxing:dayStem.getElement().getName()+'行',
+    chong:`冲${chongBranch.getZodiac().getName()}(${chongBranch.getName()})`,
+    yi:lunar.getRecommends().map(taboo=>taboo.getName()),
+    ji:lunar.getAvoids().map(taboo=>taboo.getName())
   };
 }
 
@@ -362,15 +183,10 @@ function render(){
 }
 
 function renderMonthTitle(){
-  const jq=getMonthJieqi(viewY,viewM);
-  const firstDay=new Date(viewY,viewM-1,1);
-  const jdn=JDN(viewY,viewM,1);
-  const k=kForJDN(jdn);
-  const mi=getMonthInfo(k);
-  const gz=yearGZ(mi.lunarYear);
+  const c=toChineseCal(viewY,viewM,1);
   document.getElementById('mtitle').innerHTML=
     `<div class="solar-m">${viewY}年 ${SOL_MONTHS[viewM-1]}</div>`+
-    `<div class="lunar-m">${gz}年 · ${yearZodiac(mi.lunarYear)}年 · 农历${MONTHS_CN[mi.lunarMonth-1]}月</div>`;
+    `<div class="lunar-m">${c.yearGZ}年 · ${c.zodiac}年 · 农历${c.lunarMonthName}</div>`;
 }
 
 function renderGrid(){
@@ -379,7 +195,7 @@ function renderGrid(){
   const first=new Date(viewY,viewM-1,1).getDay(); // 0=Sun
   const daysIn=new Date(viewY,viewM,0).getDate();
   const jqMap=getMonthJieqi(viewY,viewM);
-  const todayJDN=JDN(NOW.getFullYear(),NOW.getMonth()+1,NOW.getDate());
+  const todayY=NOW.getFullYear(),todayM=NOW.getMonth()+1,todayD=NOW.getDate();
 
   // prev month filler
   const prevD=new Date(viewY,viewM-1,0).getDate();
@@ -390,8 +206,7 @@ function renderGrid(){
   }
   for(let d=1;d<=daysIn;d++){
     const el=makeCell(viewY,viewM,d,false);
-    const jdn=JDN(viewY,viewM,d);
-    if(jdn===todayJDN)el.classList.add('today');
+    if(viewY===todayY&&viewM===todayM&&d===todayD)el.classList.add('today');
     if(selDate&&selDate.y===viewY&&selDate.m===viewM&&selDate.d===d)el.classList.add('sel');
     grid.appendChild(el);
   }
@@ -411,20 +226,15 @@ function makeCell(y,m,d,other){
   const dow=new Date(y,m-1,d).getDay();
   if(dow===0||dow===6)el.classList.add('weekend');
 
-  const jdn=JDN(y,m,d);
-  const k=kForJDN(jdn);
-  const mi=getMonthInfo(k);
-  const lunarDay=jdn-nmCST(k)+1;
+  const c=toChineseCal(y,m,d);
   const jqMap=getMonthJieqi(y,m);
 
-  let lhtml=lunarDay===1
-    ?`${mi.isLeap?'闰':''}${MONTHS_CN[mi.lunarMonth-1]}月`
-    :DAYS_CN[lunarDay-1];
+  let lhtml=c.lunarDay===1?c.lunarMonthName:c.lunarDayName;
 
   let extras='';
   if(jqMap[d])extras+=`<div class="jqtag">${jqMap[d]}</div>`;
   // Chinese New Year indicator
-  if(lunarDay===1&&mi.lunarMonth===1&&!mi.isLeap&&!other)
+  if(c.lunarDay===1&&c.lunarMonth===1&&!c.isLeap&&!other)
     extras+=`<div class="lnytag">春节</div>`;
 
   el.innerHTML=`<div class="snum">${d}</div><div class="ldate">${lhtml}</div>${extras}`;
@@ -445,13 +255,13 @@ function renderDetail(y,m,d){
   const jqMap=getMonthJieqi(y,m);
   const jq=jqMap[d]||'';
   const dow=['日','一','二','三','四','五','六'][new Date(y,m-1,d).getDay()];
-  const lmonStr=(c.isLeap?'闰':'')+MONTHS_CN[c.lunarMonth-1]+'月';
+  const lmonStr=c.lunarMonthName;
   const isLNY=(c.lunarDay===1&&c.lunarMonth===1&&!c.isLeap);
 
   document.getElementById('detpanel').innerHTML=`
   <div class="det-top">
     <div class="det-solar">${y}年${SOL_MONTHS[m-1]}${d}日 &nbsp;周${dow}${isLNY?' 🎆 春节':''}</div>
-    <div class="det-lunar">农历 ${c.yearGZ}年 &nbsp;${lmonStr} &nbsp;${DAYS_CN[c.lunarDay-1]}</div>
+    <div class="det-lunar">农历 ${c.yearGZ}年 &nbsp;${lmonStr} &nbsp;${c.lunarDayName}</div>
     <div class="det-gz">${c.yearGZ}年 &nbsp;${c.monthGZ}月 &nbsp;${c.dayGZ.full}日 &nbsp;·&nbsp; ${c.zodiac}年 ${jq?'&nbsp;·&nbsp;'+jq:''}</div>
   </div>
   <div class="det-grid">
@@ -473,8 +283,15 @@ function renderDetail(y,m,d){
 }
 
 // ── INIT ──
-render();
-showToday();
+window.shiftMonth=shiftMonth;
+window.goToday=goToday;
+try{
+  render();
+  showToday();
+}catch(error){
+  document.getElementById('detpanel').innerHTML=`<div class="sel-hint">Tyme 初始化失败：${error instanceof Error ? error.message : String(error)}</div>`;
+  throw error;
+}
 </script>
 </body>
 </html>
